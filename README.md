@@ -63,3 +63,4 @@ To produce the real dataset:
 pip install -r requirements.txt
 python src/pipeline.py --full
 ```
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22503185.svg)](https://doi.org/10.5281/zenodo.22503185)
