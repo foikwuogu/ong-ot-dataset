@@ -30,16 +30,6 @@ jobs:
     env:
       ZENODO_API_URL: ${{ vars.ZENODO_API_URL || 'https://zenodo.org/api' }}
       ZENODO_ACCESS_TOKEN: ${{ secrets.ZENODO_ACCESS_TOKEN }}
-      AUTHOR_BLOCK: |-
-        Friday Ogochukwu Ikwuogu
-        ORCID: 0009-0009-2222-1318
-        Google Scholar: https://scholar.google.com/citations?pli=1&authuser=3&user=XADxRNkAAAAJ
-        ResearchGate: https://www.researchgate.net/profile/Friday-O-Ikwuogu/research
-        GitHub: https://github.com/foikwuogu
-        Portfolio: Ikwuogufoikwuogu.github.io
-        LinkedIn: Ogochukwu Friday Ikwuogu
-        email: Friday.ikwuogu@gmail.com|ikwuogu_f57913@utpb.edu | ogochukwu.f.ikwuogu@ieee.org
-        Affiliation: Independent Researcher, Odessa, Texas, USA
 
     steps:
       - name: Check out repository
@@ -99,10 +89,9 @@ jobs:
           VERSION: ${{ steps.version.outputs.value }}
           REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
         run: |
-          description=$(printf '%s\n\nSource repository: %s' "$AUTHOR_BLOCK" "$REPOSITORY_URL")
           metadata=$(jq -n \
             --arg title "ONG-OT Vulnerability Prioritization Dataset $VERSION" \
-            --arg description "$description" \
+            --rawfile description .zenodo/description.html \
             --arg name "Friday Ogochukwu Ikwuogu" \
             --arg orcid "0009-0009-2222-1318" \
             --arg affiliation "Independent Researcher, Odessa, Texas, USA" \

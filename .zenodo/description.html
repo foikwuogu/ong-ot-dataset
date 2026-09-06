@@ -1,0 +1,105 @@
+<p>
+  The ONG‑OT Vulnerability Prioritization Dataset is a fully automated pipeline
+  that ingests real‑world CVE intelligence from authoritative public sources,
+  applies domain‑specific Oil &amp; Gas OT rules, and produces a versioned,
+  provenance‑rich dataset suitable for open scientific publication.
+</p>
+
+<p>This project integrates:</p>
+
+<ul>
+  <li><strong>CISA ICS Advisories</strong></li>
+  <li><strong>CISA Known Exploited Vulnerabilities (KEV)</strong></li>
+  <li><strong>FIRST.org EPSS scores</strong></li>
+  <li><strong>CISA Vulnrichment (ADP enrichment)</strong></li>
+  <li><strong>MITRE ATT&amp;CK for ICS STIX bundle</strong></li>
+</ul>
+
+<p>
+  The pipeline merges all sources on CVE ID and applies three expert‑defined
+  YAML configurations:
+</p>
+
+<ul>
+  <li><code>product_class_taxonomy.yaml</code></li>
+  <li><code>no_patch_rules.yaml</code></li>
+  <li><code>compensating_controls_cpg2.yaml</code></li>
+</ul>
+
+<p>
+  These encode Oil &amp; Gas OT product classes, no‑patch logic, and CPG 2.0
+  compensating controls with multiplicative risk‑reduction stacking.
+</p>
+
+<hr>
+
+<h2>Features</h2>
+
+<ul>
+  <li>Automated multi‑source CVE ingestion</li>
+  <li>ICS‑specific vendor/product classification</li>
+  <li>No‑patch flagging based on advisory text and vendor status</li>
+  <li>CPG 2.0 compensating control mapping</li>
+  <li>Multiplicative risk‑reduction logic</li>
+  <li>Versioned CSV output</li>
+  <li>Full provenance manifest (timestamps, URLs, row counts)</li>
+  <li>Automated Zenodo DOI publication via GitHub Actions</li>
+</ul>
+
+<hr>
+
+<h2>Data Sources</h2>
+
+<p>All sources are public and require no authentication:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Source</th>
+      <th>Purpose</th>
+      <th>URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ICS Advisory Project</td>
+      <td>Clean CISA ICS advisories</td>
+      <td><a href="https://github.com/icsadvprj/ICS-Advisory-Project">https://github.com/icsadvprj/ICS-Advisory-Project</a></td>
+    </tr>
+    <tr>
+      <td>CISA KEV</td>
+      <td>Known exploited vulnerabilities</td>
+      <td><a href="https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json">https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json</a></td>
+    </tr>
+    <tr>
+      <td>FIRST.org EPSS</td>
+      <td>Exploit prediction scores</td>
+      <td><a href="https://api.first.org/data/v1/epss">https://api.first.org/data/v1/epss</a></td>
+    </tr>
+    <tr>
+      <td>CISA Vulnrichment</td>
+      <td>CVSS/CWE/SSVC enrichment</td>
+      <td><a href="https://github.com/cisagov/vulnrichment">https://github.com/cisagov/vulnrichment</a></td>
+    </tr>
+    <tr>
+      <td>MITRE ATT&amp;CK for ICS</td>
+      <td>Technique mapping</td>
+      <td><a href="https://github.com/mitre-attack/attack-stix-data/tree/master/ics-attack">https://github.com/mitre-attack/attack-stix-data/tree/master/ics-attack</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2>Running the Pipeline</h2>
+
+<p>To produce the real dataset:</p>
+
+<pre><code>pip install -r requirements.txt
+python src/pipeline.py --full</code></pre>
+
+<p>
+  <a href="https://doi.org/10.5281/zenodo.22503185">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.22503185.svg" alt="DOI: 10.5281/zenodo.22503185">
+  </a>
+</p>

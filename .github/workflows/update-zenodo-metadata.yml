@@ -1,0 +1,90 @@
+name: Update Zenodo metadata
+
+on:
+  workflow_dispatch:
+    inputs:
+      record_id:
+        description: Zenodo record or deposition ID to update
+        required: true
+        default: '22503185'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  update-description:
+    runs-on: ubuntu-latest
+    env:
+      ZENODO_API_URL: ${{ vars.ZENODO_API_URL || 'https://zenodo.org/api' }}
+      ZENODO_ACCESS_TOKEN: ${{ secrets.ZENODO_ACCESS_TOKEN }}
+      RECORD_ID: ${{ inputs.record_id }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate configuration
+        run: |
+          if [[ -z "$ZENODO_ACCESS_TOKEN" ]]; then
+            echo "Repository secret ZENODO_ACCESS_TOKEN is required." >&2
+            exit 1
+          fi
+          if [[ ! "$RECORD_ID" =~ ^[0-9]+$ ]]; then
+            echo "Record ID must contain only digits." >&2
+            exit 1
+          fi
+
+      - name: Update Zenodo description
+        id: update
+        run: |
+          api="$ZENODO_API_URL/deposit/depositions/$RECORD_ID"
+          current=$(curl --fail-with-body --silent --show-error \
+            --header "Authorization: Bearer $ZENODO_ACCESS_TOKEN" \
+            "$api")
+          was_published=$(jq -r '.submitted // false' <<< "$current")
+
+          if [[ "$was_published" == "true" ]]; then
+            curl --fail-with-body --silent --show-error \
+              --request POST \
+              --header "Authorization: Bearer $ZENODO_ACCESS_TOKEN" \
+              "$api/actions/edit" > /dev/null
+            current=$(curl --fail-with-body --silent --show-error \
+              --header "Authorization: Bearer $ZENODO_ACCESS_TOKEN" \
+              "$api")
+          fi
+
+          payload=$(jq --rawfile description .zenodo/description.html \
+            '{metadata: (.metadata | .description = $description)}' <<< "$current")
+          curl --fail-with-body --silent --show-error \
+            --request PUT \
+            --header "Authorization: Bearer $ZENODO_ACCESS_TOKEN" \
+            --header "Content-Type: application/json" \
+            --data "$payload" \
+            "$api" > /dev/null
+
+          if [[ "$was_published" == "true" ]]; then
+            response=$(curl --fail-with-body --silent --show-error \
+              --request POST \
+              --header "Authorization: Bearer $ZENODO_ACCESS_TOKEN" \
+              "$api/actions/publish")
+          else
+            response=$(curl --fail-with-body --silent --show-error \
+              --header "Authorization: Bearer $ZENODO_ACCESS_TOKEN" \
+              "$api")
+          fi
+
+          echo "record_url=$(jq -r '.links.record_html // .links.html // empty' <<< "$response")" >> "$GITHUB_OUTPUT"
+          echo "doi=$(jq -r '.doi // .metadata.prereserve_doi.doi // empty' <<< "$response")" >> "$GITHUB_OUTPUT"
+
+      - name: Add run summary
+        env:
+          RECORD_URL: ${{ steps.update.outputs.record_url }}
+          DOI: ${{ steps.update.outputs.doi }}
+        run: |
+          {
+            echo "## Zenodo metadata updated"
+            echo
+            echo "Record: $RECORD_URL"
+            echo "DOI: $DOI"
+          } >> "$GITHUB_STEP_SUMMARY"
