@@ -1,0 +1,176 @@
+name: Build and publish dataset to Zenodo
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Dataset version used in output filenames
+        required: true
+        default: v1.0
+        type: string
+      publish:
+        description: Publish the Zenodo deposition after upload
+        required: true
+        default: false
+        type: boolean
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zenodo-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      ZENODO_API_URL: ${{ vars.ZENODO_API_URL || 'https://zenodo.org/api' }}
+      ZENODO_ACCESS_TOKEN: ${{ secrets.ZENODO_ACCESS_TOKEN }}
+      AUTHOR_BLOCK: |-
+        Friday Ogochukwu Ikwuogu
+        ORCID: 0009-0009-2222-1318
+        Google Scholar: https://scholar.google.com/citations?pli=1&authuser=3&user=XADxRNkAAAAJ
+        ResearchGate: https://www.researchgate.net/profile/Friday-O-Ikwuogu/research
+        GitHub: https://github.com/foikwuogu
+        Portfolio: Ikwuogufoikwuogu.github.io
+        LinkedIn: Ogochukwu Friday Ikwuogu
+        email: Friday.ikwuogu@gmail.com|ikwuogu_f57913@utpb.edu | ogochukwu.f.ikwuogu@ieee.org
+        Affiliation: Independent Researcher, Odessa, Texas, USA
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install --requirement requirements.txt
+
+      - name: Select dataset version
+        id: version
+        env:
+          MANUAL_VERSION: ${{ inputs.version }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            version="$RELEASE_TAG"
+          else
+            version="$MANUAL_VERSION"
+          fi
+          if [[ ! "$version" =~ ^[A-Za-z0-9._-]+$ ]]; then
+            echo "Version may contain only letters, numbers, dots, underscores, and hyphens." >&2
+            exit 1
+          fi
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Build full dataset
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python src/pipeline.py --full --version "${{ steps.version.outputs.value }}"
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ong-ot-dataset-${{ steps.version.outputs.value }}
+          path: |
+            data/processed/ong_ot_dataset_${{ steps.version.outputs.value }}.csv
+            data/processed/ong_ot_dataset_${{ steps.version.outputs.value }}_manifest.json
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Validate Zenodo configuration
+        run: |
+          if [[ -z "$ZENODO_ACCESS_TOKEN" ]]; then
+            echo "Repository secret ZENODO_ACCESS_TOKEN is required." >&2
+            exit 1
+          fi
+
+      - name: Create Zenodo deposition
+        id: deposition
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+          REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
+        run: |
+          description=$(printf '%s\n\nSource repository: %s' "$AUTHOR_BLOCK" "$REPOSITORY_URL")
+          metadata=$(jq -n \
+            --arg title "ONG-OT Vulnerability Prioritization Dataset $VERSION" \
+            --arg description "$description" \
+            --arg name "Friday Ogochukwu Ikwuogu" \
+            --arg orcid "0009-0009-2222-1318" \
+            --arg affiliation "Independent Researcher, Odessa, Texas, USA" \
+            --arg repository "$REPOSITORY_URL" \
+            '{metadata: {
+              title: $title,
+              upload_type: "dataset",
+              description: $description,
+              creators: [{name: $name, orcid: $orcid, affiliation: $affiliation}],
+              access_right: "open",
+              license: "odbl-1.0",
+              version: env.VERSION,
+              related_identifiers: [{identifier: $repository, relation: "isSupplementTo", scheme: "url"}]
+            }}')
+          response=$(curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer $ZENODO_ACCESS_TOKEN" \
+            --header "Content-Type: application/json" \
+            --data "$metadata" \
+            "$ZENODO_API_URL/deposit/depositions")
+          deposition_id=$(jq -er '.id' <<< "$response")
+          bucket_url=$(jq -er '.links.bucket' <<< "$response")
+          echo "id=$deposition_id" >> "$GITHUB_OUTPUT"
+          echo "bucket_url=$bucket_url" >> "$GITHUB_OUTPUT"
+
+      - name: Upload files to Zenodo
+        env:
+          BUCKET_URL: ${{ steps.deposition.outputs.bucket_url }}
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          for file in \
+            "data/processed/ong_ot_dataset_${VERSION}.csv" \
+            "data/processed/ong_ot_dataset_${VERSION}_manifest.json"; do
+            curl --fail-with-body --silent --show-error \
+              --request PUT \
+              --header "Authorization: Bearer $ZENODO_ACCESS_TOKEN" \
+              --upload-file "$file" \
+              "$BUCKET_URL/$(basename "$file")"
+          done
+
+      - name: Publish Zenodo deposition
+        id: publish
+        if: github.event_name == 'release' || inputs.publish
+        env:
+          DEPOSITION_ID: ${{ steps.deposition.outputs.id }}
+        run: |
+          response=$(curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer $ZENODO_ACCESS_TOKEN" \
+            "$ZENODO_API_URL/deposit/depositions/$DEPOSITION_ID/actions/publish")
+          echo "doi=$(jq -r '.doi // empty' <<< "$response")" >> "$GITHUB_OUTPUT"
+          echo "record_url=$(jq -r '.links.record_html // .links.html // empty' <<< "$response")" >> "$GITHUB_OUTPUT"
+
+      - name: Add run summary
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+          DEPOSITION_ID: ${{ steps.deposition.outputs.id }}
+          DOI: ${{ steps.publish.outputs.doi }}
+          RECORD_URL: ${{ steps.publish.outputs.record_url }}
+        run: |
+          {
+            echo "## ONG-OT dataset $VERSION"
+            echo
+            echo "Zenodo deposition: $DEPOSITION_ID"
+            if [[ -n "$DOI" ]]; then
+              echo "DOI: $DOI"
+              echo "Record: $RECORD_URL"
+            else
+              echo "Status: draft deposition (files uploaded, not published)"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

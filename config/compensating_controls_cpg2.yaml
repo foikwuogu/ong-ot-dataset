@@ -1,0 +1,15 @@
+# COMPENSATING CONTROLS, MAPPED TO CISA CPG 2.0 — owned and defined by the
+# client (Friday Ogochukwu Ikwuogu).
+#
+# Each control applies to one or more product classes (from
+# product_class_taxonomy.yaml) and reduces the row's effective risk score by
+# the stated fraction. A row can match more than one control; reductions
+# stack multiplicatively (see src/join.py: apply_compensating_control).
+
+controls:
+  - id: CPG2-1
+    applies_to: ["plc", "rtu"]
+    reduces_risk_by: 0.2
+  - id: CPG2-4
+    applies_to: ["scada"]
+    reduces_risk_by: 0.1

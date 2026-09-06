@@ -1,0 +1,14 @@
+# NO-PATCH FLAG RULES — owned and defined by the client (Friday Ogochukwu Ikwuogu).
+#
+# An advisory is flagged no_patch_available = True if ANY of the following hit:
+#   1. advisory_contains: case-insensitive substring match against the
+#      advisory's Mitigation + Remediation text.
+#   2. vendor_status: matched against a Vendor Status field if the source
+#      data provides one (blank/unavailable in the ICS Advisory Project CSV
+#      today — reserved for when that column is added or joined in).
+#   3. cve_status: matched against a CVE status field, same caveat as above.
+
+no_patch:
+  - advisory_contains: ["no patch", "no fix", "mitigation only"]
+  - vendor_status: ["EOL", "unsupported"]
+  - cve_status: ["awaiting vendor response"]

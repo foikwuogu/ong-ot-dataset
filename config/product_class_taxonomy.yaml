@@ -1,0 +1,20 @@
+# PRODUCT-CLASS TAXONOMY — owned and defined by the client (Friday Ogochukwu Ikwuogu).
+#
+# Matching is by vendor name against the ICS Advisory Project's Vendor column
+# (case-insensitive substring match — see src/join.py).
+
+classes:
+  plc:
+    weight: 0.9
+    vendors: [Schneider, Rockwell, Siemens]
+
+  rtu:
+    weight: 0.8
+    vendors: [ABB, Emerson]
+
+  scada:
+    weight: 0.7
+    vendors: [Honeywell, Yokogawa]
+
+# Fallback behavior for vendors not listed above:
+unmapped_default_weight: 0.0

@@ -1,0 +1,5 @@
+cve_id,Vendor,Product,Advisory,CI_Sector,Mitigation,Remediation,cwe_id
+CVE-2024-21762,Fortinet,FortiOS SSL VPN,ICSA-24-INTL-01,Energy,"No update is available for this build; upgrade to a patched version when released.","Upgrade to FortiOS 7.4.3 or later.",CWE-787
+CVE-2023-6448,Unitronics,Vision Series PLC,ICSA-23-325-01,Water and Wastewater,"Change default password immediately.","Vendor has not responded with a firmware fix as of this advisory.",CWE-1188
+CVE-2022-1161,Schneider Electric,Modicon Controllers,ICSA-22-179-01,Energy,"Apply the vendor-provided firmware update.","Firmware update available; apply per vendor bulletin.",CWE-707
+CVE-2021-38452,Rockwell Automation,FactoryTalk Historian,ICSA-21-329-01,Energy,"No patch currently available; restrict network access to the affected service.","End of life for this product version; vendor recommends migration.",CWE-306
