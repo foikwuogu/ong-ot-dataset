@@ -1,20 +1,110 @@
-# PRODUCT-CLASS TAXONOMY — owned and defined by the client (Friday Ogochukwu Ikwuogu).
+# PRODUCT-CLASS TAXONOMY v1.1 — owned and defined by the client (Friday Ogochukwu Ikwuogu).
 #
-# Matching is by vendor name against the ICS Advisory Project's Vendor column
-# (case-insensitive substring match — see src/join.py).
+# CHANGED FROM v1.0: v1.0 had 3 classes mapped to 7 generic industrial ICS
+# vendors (Schneider, Rockwell, Siemens, ABB, Emerson, Honeywell, Yokogawa) —
+# not oil & gas-specific at all, so the vast majority of rows fell to
+# unmapped_default_weight (0.0). v1.1 adds a genuinely oil & gas-specific
+# `ong_product_line` class (curated vendor/product-family allowlist, matched
+# against Vendor + Product + Products_Affected + advisory title text, not
+# vendor alone) at the highest weight, keeps the v1.0 generic vendor classes
+# at a reduced weight (they are ONG-adjacent, not ONG-exclusive — these
+# vendors sell into every sector), and adds a narrowly-scoped
+# `electric_adjacent` class for equipment at oil & gas / electric-grid
+# interconnection points, per the author's scoping call (see BUILD_SPEC.md).
+#
+# [VERIFY] The author must confirm this allowlist and every weight against
+# their own field knowledge before this dataset is cited or published — this
+# is a curated judgment call, not a fetched fact. See VERIFY_CHECKLIST.md.
+#
+# Matching (src/join.py apply_product_class), in the order classes appear
+# below — first match wins:
+#   match: vendor_or_product              substring match against Vendor +
+#                                          Product + Products_Affected +
+#                                          ICS-CERT_Advisory_Title (case-insensitive)
+#   match: vendor_only                    substring match against Vendor only
+#                                          (kept from v1.0 for the generic classes)
+#   match: vendor_or_product_and_context  BOTH a product-family match AND a
+#                                          context keyword must hit — used only
+#                                          for electric_adjacent, by design
+#                                          narrow (see LIMITATIONS.md; 0 matches
+#                                          in a given build is expected, not a bug)
 
 classes:
-  plc:
+  ong_product_line:
     weight: 0.9
+    match: vendor_or_product
+    vendors_products:
+      # RTU / flow-computer / gas-measurement product families (Emerson /
+      # Remote Automation Solutions and legacy Bristol Babcock lines)
+      - ROC800
+      - ROC800L
+      - DL8000
+      - FloBoss
+      - ControlWave
+      - OpenBSI
+      - Totalflow
+      # Pipeline SCADA / RTU families
+      - SCADAPack
+      - RemoteConnect
+      - Telvent
+      # Valve / actuator control
+      - ValveLink
+      # Flow measurement / custody transfer / tank gauging
+      - Micro Motion
+      - gas chromatograph
+      - Enraf
+      - Varec
+      - Toptech
+      - tank gauging
+      - custody transfer
+      - flow computer
+      - wellhead
+      # NOTE: deliberately does NOT include generic context words like
+      # "pipeline", "midstream", "upstream", or "compressor station" — those
+      # collide with electric_adjacent's context_keywords below (a protection
+      # relay advisory that merely mentions "compressor station" is not an
+      # oil & gas-specific *product*). Every entry here names an actual
+      # product family or asset type, not a sector-context word.
+
+  plc:
+    weight: 0.5
+    match: vendor_only
     vendors: [Schneider, Rockwell, Siemens]
 
   rtu:
-    weight: 0.8
+    weight: 0.5
+    match: vendor_only
     vendors: [ABB, Emerson]
 
   scada:
-    weight: 0.7
+    weight: 0.5
+    match: vendor_only
     vendors: [Honeywell, Yokogawa]
 
-# Fallback behavior for vendors not listed above:
+  electric_adjacent:
+    weight: 0.3
+    match: vendor_or_product_and_context
+    # Narrow by design (author's scoping call): protection-relay / interconnection
+    # product families commonly deployed at ONG/grid interconnection points
+    # (e.g. compressor-station power feeds, pipeline-to-grid metering).
+    # [VERIFY] this product list against your own field knowledge — it is a
+    # starting allowlist, not a verified inventory.
+    vendors_products:
+      - SEL-4
+      - SEL-3
+      - SEL-7
+      - Multilin
+      - protection relay
+      - RED6
+      - REF6
+      - REL6
+    context_keywords:
+      - interconnection
+      - point of interconnection
+      - grid tie
+      - grid-tie
+      - compressor station
+      - substation
+
+# Fallback behavior for rows matching none of the classes above:
 unmapped_default_weight: 0.0

@@ -1,5 +1,5 @@
 <p>
-  The ONG‑OT Vulnerability Prioritization Dataset is a fully automated pipeline
+  The ONG‑OT Vulnerability Prioritization Dataset is a reproducible pipeline
   that ingests real‑world CVE intelligence from authoritative public sources,
   applies domain‑specific Oil &amp; Gas OT rules, and produces a versioned,
   provenance‑rich dataset suitable for open scientific publication.
@@ -11,8 +11,8 @@
   <li><strong>CISA ICS Advisories</strong></li>
   <li><strong>CISA Known Exploited Vulnerabilities (KEV)</strong></li>
   <li><strong>FIRST.org EPSS scores</strong></li>
-  <li><strong>CISA Vulnrichment (ADP enrichment)</strong></li>
-  <li><strong>MITRE ATT&amp;CK for ICS STIX bundle</strong></li>
+  <li><strong>CISA Vulnrichment</strong> (the full CVE record — CNA-submitted data plus CISA's own ADP enrichment)</li>
+  <li><strong>MITRE ATT&amp;CK for ICS</strong> (technique, threat-group, and malware/tool profiles)</li>
 </ul>
 
 <p>
@@ -31,19 +31,34 @@
   compensating controls with multiplicative risk‑reduction stacking.
 </p>
 
+<h2>What changed in v1.1</h2>
+
+<p>
+  v1.0 shipped with no-patch flagging that never actually fired on real data
+  (it matched columns that don't exist in the real source), a product-class
+  taxonomy of generic industrial ICS vendors rather than oil &amp; gas-specific
+  ones, and an ATT&amp;CK for ICS fetch that was never joined into the dataset.
+  v1.1 fixes all three: no-patch flagging now reads real Vulnrichment CNA
+  remediation text, the taxonomy adds a curated oil &amp; gas product-family
+  class plus a narrow electric-adjacent class, and ATT&amp;CK for ICS
+  group/software profiles are now joined row-by-row where a product is
+  explicitly named in a threat profile's own description. Full detail in the
+  repository's <code>docs/</code> folder.
+</p>
+
 <hr>
 
 <h2>Features</h2>
 
 <ul>
-  <li>Automated multi‑source CVE ingestion</li>
-  <li>ICS‑specific vendor/product classification</li>
-  <li>No‑patch flagging based on advisory text and vendor status</li>
+  <li>Multi‑source CVE ingestion with per-fetch provenance logging</li>
+  <li>Curated oil &amp; gas OT product classification (plus a narrow electric-adjacent class)</li>
+  <li>No‑patch flagging based on real vendor remediation text (Vulnrichment CNA solutions/workarounds)</li>
   <li>CPG 2.0 compensating control mapping</li>
+  <li>MITRE ATT&amp;CK for ICS group/software matching, joined into the dataset</li>
   <li>Multiplicative risk‑reduction logic</li>
-  <li>Versioned CSV output</li>
-  <li>Full provenance manifest (timestamps, URLs, row counts)</li>
-  <li>Automated Zenodo DOI publication via GitHub Actions</li>
+  <li>Versioned CSV output with a QA report and stats file</li>
+  <li>Automated Zenodo DOI versioning via GitHub Actions</li>
 </ul>
 
 <hr>
@@ -78,12 +93,12 @@
     </tr>
     <tr>
       <td>CISA Vulnrichment</td>
-      <td>CVSS/CWE/SSVC enrichment</td>
+      <td>Full CVE record: CNA data + CISA ADP enrichment</td>
       <td><a href="https://github.com/cisagov/vulnrichment">https://github.com/cisagov/vulnrichment</a></td>
     </tr>
     <tr>
       <td>MITRE ATT&amp;CK for ICS</td>
-      <td>Technique mapping</td>
+      <td>Technique + group/software profiles</td>
       <td><a href="https://github.com/mitre-attack/attack-stix-data/tree/master/ics-attack">https://github.com/mitre-attack/attack-stix-data/tree/master/ics-attack</a></td>
     </tr>
   </tbody>
@@ -96,7 +111,7 @@
 <p>To produce the real dataset:</p>
 
 <pre><code>pip install -r requirements.txt
-python src/pipeline.py --full</code></pre>
+python src/pipeline.py --full --version v1.1</code></pre>
 
 <p>
   <a href="https://doi.org/10.5281/zenodo.22503185">

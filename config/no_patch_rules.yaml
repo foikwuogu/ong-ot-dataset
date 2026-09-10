@@ -1,14 +1,61 @@
-# NO-PATCH FLAG RULES — owned and defined by the client (Friday Ogochukwu Ikwuogu).
+# NO-PATCH FLAG RULES v1.1 — owned and defined by the client (Friday Ogochukwu Ikwuogu).
 #
-# An advisory is flagged no_patch_available = True if ANY of the following hit:
-#   1. advisory_contains: case-insensitive substring match against the
-#      advisory's Mitigation + Remediation text.
-#   2. vendor_status: matched against a Vendor Status field if the source
-#      data provides one (blank/unavailable in the ICS Advisory Project CSV
-#      today — reserved for when that column is added or joined in).
-#   3. cve_status: matched against a CVE status field, same caveat as above.
+# CHANGED FROM v1.0: v1.0's `advisory_contains` trigger checked a `Mitigation` /
+# `Remediation` column that does not exist anywhere in the real ICS Advisory
+# Project CSV (confirmed against the source's actual header — it has no such
+# fields; those two column names only ever appeared in this repo's own
+# hand-made demo fixture). In a real `--full` run, that trigger could never
+# fire, and no_patch_available was False for every row. v1.0's two other
+# triggers (`vendor_status`, `cve_status`) checked columns nothing populated
+# either. So in the published v1.0.0 dataset, no_patch_available is silently
+# False everywhere — the feature the README describes ("no-patch flagging
+# based on advisory text and vendor status") did not actually run.
+#
+# v1.1 replaces this with a real, working signal: CISA's Vulnrichment mirror
+# serves the FULL CVE record (not just CISA's own ADP enrichment), so
+# containers.cna.solutions and containers.cna.workarounds — the vendor's own
+# published remediation text, when a CNA supplied one — are now fetched
+# (src/fetch_vulnrichment.py) and matched here.
+#
+# [VERIFY] This is a judgment call, not a fact to look up: which phrases
+# indicate no patch exists, and — separately — what it means when a CVE has
+# no `solutions`/`workarounds` text at all (this happens for a meaningful
+# share of records; it means "not captured by Vulnrichment," not "a patch
+# exists" — see LIMITATIONS.md). Confirm both before publication.
+#
+# Trigger: cna_text_contains
+#   Case-insensitive substring match against the concatenation of
+#   `vulnrichment_cna_solutions` + `vulnrichment_cna_workarounds`
+#   (src/fetch_vulnrichment.py, joined into the row by src/join.py).
+#   Any single phrase hit on any single trigger below fires the flag.
 
 no_patch:
-  - advisory_contains: ["no patch", "no fix", "mitigation only"]
-  - vendor_status: ["EOL", "unsupported"]
-  - cve_status: ["awaiting vendor response"]
+  - cna_text_contains:
+      - "no patch"
+      - "no fix"
+      - "no update is available"
+      - "not currently available"
+      - "not yet available"
+      - "has not released"
+      - "has not responded"
+      - "no plans to"
+      - "will not be fixed"
+      - "will not fix"
+      - "will not release"
+      - "end of life"
+      - "end-of-life"
+      - "no longer supported"
+      - "unsupported"
+      - "mitigation only"
+      - "no vendor response"
+      - "recommends replacing"
+      - "recommends decommissioning"
+
+# missing_vendor_remediation_text (informational only, NOT a no-patch trigger):
+# when vulnrichment_cna_solutions and vulnrichment_cna_workarounds are both
+# blank, the row is coded no_patch_available = False by default (absence of
+# text is treated as "unknown", not "patched") but is separately flagged
+# `no_patch_basis = "no_remediation_text_captured"` in src/join.py so this
+# large, honest "we don't actually know" bucket stays visible in the QA
+# report and is never silently folded into either True or False as if it
+# were a confident determination.

@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this dataset, please cite it as below."
+type: dataset
+title: "ONG-OT Vulnerability Prioritization Dataset"
+version: "1.1.0"
+date-released: "2026-09-10"
+authors:
+  - family-names: "Ikwuogu"
+    given-names: "Friday Ogochukwu"
+    orcid: "https://orcid.org/0009-0009-2222-1318"
+    affiliation: "Independent Researcher, Odessa, Texas, USA"
+  - family-names: "Abutu"
+    given-names: "Silas"
+    affiliation: "Petroleum Training Institute, Effurun, Delta State, Nigeria"
+  - family-names: "Orimogunje"
+    given-names: "Abidemi"
+    affiliation: "Redeemer's University, Ede, Osun State, Nigeria"
+license: CC-BY-4.0
+repository-code: "https://github.com/foikwuogu/ong-ot-dataset"
+doi: "10.5281/zenodo.22503185"
+keywords:
+  - "operational technology"
+  - "oil and gas"
+  - "vulnerability prioritization"
+  - "ICS"
+  - "SCADA"
+  - "CISA CPG 2.0"
+  - "critical infrastructure"

@@ -1,15 +1,81 @@
-# COMPENSATING CONTROLS, MAPPED TO CISA CPG 2.0 — owned and defined by the
-# client (Friday Ogochukwu Ikwuogu).
+# COMPENSATING CONTROLS, MAPPED TO CISA CPG 2.0 — v1.1 — owned and defined by
+# the client (Friday Ogochukwu Ikwuogu).
+#
+# CHANGED FROM v1.0: v1.0 had 2 controls covering 2 of 3 product classes — a
+# placeholder, not a real crosswalk. v1.1 expands to a control per relevant
+# CPG 2.0 goal area, covering every class in the v1.1 taxonomy including the
+# new `ong_product_line` and `electric_adjacent` classes.
+#
+# [VERIFY] The primary CPG 2.0 PDF (cisa.gov, Dec 2025 edition) returns HTTP
+# 403 to automated fetch from this build environment — the same issue the
+# v1.0 pipeline's author notes hit the CPG/TSA primary sources. The goal IDs
+# and titles below are reconstructed from CISA's own CPG web pages and
+# third-party summaries, cross-checked against each other, NOT read directly
+# from the primary PDF. Re-read the primary document yourself
+# (cisa.gov/cybersecurity-performance-goals-2-0-cpg-2-0) and correct any goal
+# ID, title, or applicability below before this dataset is cited or
+# published. See VERIFY_CHECKLIST.md.
 #
 # Each control applies to one or more product classes (from
 # product_class_taxonomy.yaml) and reduces the row's effective risk score by
 # the stated fraction. A row can match more than one control; reductions
-# stack multiplicatively (see src/join.py: apply_compensating_control).
+# stack multiplicatively (src/join.py: apply_compensating_control).
 
 controls:
-  - id: CPG2-1
-    applies_to: ["plc", "rtu"]
+  - id: CPG2-2A
+    title: "Asset inventory"
+    applies_to: ["ong_product_line", "plc", "rtu", "scada", "electric_adjacent"]
+    reduces_risk_by: 0.05
+    rationale: >
+      An operator that maintains a current OT asset inventory (make, model,
+      firmware version) can act on this row immediately rather than first
+      discovering whether the affected device is even in its environment.
+
+  - id: CPG2-2C
+    title: "No exploitable services on the internet"
+    applies_to: ["ong_product_line", "rtu", "scada"]
     reduces_risk_by: 0.2
-  - id: CPG2-4
-    applies_to: ["scada"]
+    rationale: >
+      RTU/SCADA/flow-computer product families are the classes most commonly
+      found internet-exposed in ICS-focused internet scans; removing that
+      exposure is the single highest-leverage compensating control CPG 2.0
+      names for this class of device.
+
+  - id: CPG2-1B
+    title: "OT-specific cybersecurity leadership / governance"
+    applies_to: ["ong_product_line", "electric_adjacent"]
+    reduces_risk_by: 0.05
+    rationale: >
+      Applies broadly wherever OT-specific governance exists as a
+      compensating factor around an otherwise-unpatched device; a small,
+      non-technical reduction distinct from the technical controls below.
+
+  - id: CPG2-3X-SEG
+    title: "Network segmentation (OT/IT boundary)"
+    applies_to: ["ong_product_line", "plc", "rtu", "scada"]
+    reduces_risk_by: 0.2
+    rationale: >
+      Segmenting control-system networks from the corporate IT network and
+      the internet is CPG 2.0's core OT recommendation and the single
+      largest documented risk-reduction lever for PLC/RTU/SCADA-class
+      devices specifically.
+
+  - id: CPG2-1G
+    title: "Vendor and supplier cybersecurity requirements"
+    applies_to: ["electric_adjacent"]
     reduces_risk_by: 0.1
+    rationale: >
+      Interconnection-point protection/SCADA equipment is often
+      utility-owned or utility-specified; vendor/supplier cybersecurity
+      requirements in the interconnection agreement are the compensating
+      control most directly available to the ONG-side operator.
+
+  - id: CPG2-2O
+    title: "Mitigation of known exploited vulnerabilities (CISA KEV)"
+    applies_to: ["ong_product_line", "plc", "rtu", "scada", "electric_adjacent"]
+    reduces_risk_by: 0.0
+    rationale: >
+      Recorded for crosswalk completeness (every row's `known_exploited`
+      column already reflects CISA KEV membership directly); this control
+      does not additionally reduce the computed risk score to avoid
+      double-counting a signal the dataset already carries as its own field.

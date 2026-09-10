@@ -1,3 +1,8 @@
-cve_id,vulnrichment_cvss,vulnrichment_ssvc
-CVE-2024-21762,9.6,"['Act']"
-CVE-2023-6448,7.5,"['Attend']"
+cve_id,vulnrichment_cvss,vulnrichment_ssvc,vulnrichment_cna_solutions,vulnrichment_cna_workarounds,vulnrichment_remediation_text,vulnrichment_remediation_text_present
+CVE-2024-21762,9.6,"['Act']","Please upgrade to FortiOS version 7.6.0 or above",,"Please upgrade to FortiOS version 7.6.0 or above",True
+CVE-2023-6448,7.5,"['Attend']",,,,False
+CVE-2022-1161,7.5,"['Track']","Apply the vendor-provided firmware update to v4.2",,"Apply the vendor-provided firmware update to v4.2",True
+CVE-2021-38452,6.5,"['Attend']",,"Vendor has not released a fix; product is end of life","Vendor has not released a fix; product is end of life",True
+CVE-2025-30001,9.1,"['Act']","Apply Tricon firmware patch 11.6",,"Apply Tricon firmware patch 11.6",True
+CVE-2025-40002,8.1,"['Act']",,"No patch is currently available; vendor recommends replacing the relay","No patch is currently available; vendor recommends replacing the relay",True
+CVE-2025-50003,7.8,"['Track']",,,,False
