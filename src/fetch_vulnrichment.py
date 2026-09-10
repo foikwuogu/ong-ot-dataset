@@ -6,9 +6,24 @@ Layout: one JSON file per CVE, path-sharded by CVE year and the first digits
 of the number, e.g. cves/2024/21xxx/CVE-2024-21762.json.
 
 Because this repo is large, we only pull records for the CVE IDs the advisory
-join already needs, using the GitHub API's "get contents" endpoint per file.
-Unauthenticated GitHub API calls are rate-limited (60/hour); for a full run,
-set a GITHUB_TOKEN environment variable to raise that to 5,000/hour.
+join already needs, fetched directly from the raw content CDN
+(raw.githubusercontent.com) rather than the GitHub REST API. This matters:
+raw.githubusercontent.com is NOT the api.github.com "get contents" endpoint,
+is not subject to the 60/hour (unauthenticated) or 5,000/hour (authenticated)
+GitHub API rate limits, and — this is the bug fixed here — does not reliably
+accept a GitHub API Bearer token the way api.github.com does. A real v1.1
+`--full` run on 2026-09-10 sent the GitHub Actions job token
+(`${{ github.token }}`) as an `Authorization: Bearer` header on every one of
+these requests (inherited from code written for the api.github.com contents
+endpoint, then pointed at RAW_BASE without removing the header), and got
+`vulnrichment_remediation_text_present_pct = 0.0` across all 27,924 rows —
+i.e. every single fetch silently failed non-200 and was swallowed by the
+`continue` below. raw.githubusercontent.com serves public-repo content with
+no authentication required at all, so the header was pure downside. FIX:
+never send an Authorization header on these requests. If GitHub ever
+rate-limits this CDN path in practice, the real fix is to switch to the
+actual api.github.com contents endpoint (base64-decode the response) — not
+to keep sending a token this endpoint doesn't want.
 
 CHANGED IN v1.1: the file served at this path is the FULL CVE Record (CNA
 container as originally submitted, plus CISA's own ADP container appended) —
@@ -24,7 +39,6 @@ unpatched guess — see `vulnrichment_remediation_text_present` below and
 LIMITATIONS.md.
 """
 from __future__ import annotations
-import os
 import re
 import requests
 import pandas as pd
@@ -50,19 +64,21 @@ def _join_texts(entries: list) -> str:
 
 def fetch_for_cves(cve_ids: list[str], session: requests.Session | None = None) -> pd.DataFrame:
     session = session or requests.Session()
-    headers = {"User-Agent": "ong-ot-dataset-pipeline/1.1"}
-    token = os.environ.get("GITHUB_TOKEN")
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-    session.headers.update(headers)
+    # Deliberately NO Authorization header: this hits raw.githubusercontent.com
+    # (public CDN, no auth needed or wanted) not the api.github.com contents
+    # endpoint. Sending a GitHub API token here previously broke every fetch
+    # silently — see the module docstring for the 2026-09-10 incident.
+    session.headers.update({"User-Agent": "ong-ot-dataset-pipeline/1.1"})
 
     rows = []
+    non_200_count = 0
     for cve_id in cve_ids:
         path = _shard_path(cve_id)
         if path is None:
             continue
         resp = session.get(RAW_BASE + path, timeout=20)
         if resp.status_code != 200:
+            non_200_count += 1
             continue  # no ADP enrichment published for this CVE yet
         try:
             record = resp.json()
@@ -94,6 +110,26 @@ def fetch_for_cves(cve_ids: list[str], session: requests.Session | None = None) 
             "vulnrichment_remediation_text": remediation_text,
             "vulnrichment_remediation_text_present": bool(remediation_text),
         })
+
+    total = len(cve_ids)
+    if total:
+        import sys
+        fetched_pct = 100.0 * len(rows) / total
+        print(
+            f"[fetch_vulnrichment] {len(rows)}/{total} CVE records fetched "
+            f"({fetched_pct:.1f}%), {non_200_count} non-200 responses.",
+            file=sys.stderr,
+        )
+        if fetched_pct < 20.0:
+            print(
+                "[fetch_vulnrichment] WARNING: fetch success rate is very low. "
+                "This usually means requests are being rejected outright (e.g. "
+                "an unwanted Authorization header, a changed branch name, or a "
+                "network block) rather than genuinely-missing enrichment for "
+                "each CVE. Do not trust a near-zero remediation_text_present "
+                "rate until this is investigated.",
+                file=sys.stderr,
+            )
 
     if not rows:
         return pd.DataFrame(columns=[

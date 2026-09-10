@@ -33,6 +33,27 @@ honestly known about the data.
    assuming a patch exists. **[VERIFY]** the phrase list and what share of
    rows land in that "no signal" bucket once real data comes back.
 
+   **Update, 2026-09-10:** the first real `--full` run (on GitHub Actions)
+   returned `vulnrichment_remediation_text_present_pct = 0.0` across all
+   27,924 rows — every single Vulnrichment fetch silently failed. Root
+   cause: `src/fetch_vulnrichment.py` was sending the GitHub Actions job
+   token (`GITHUB_TOKEN`, wired into the workflow to raise the *API* rate
+   limit) as an `Authorization: Bearer` header on requests to
+   `raw.githubusercontent.com` — a public content CDN, not the
+   `api.github.com` contents endpoint the original code comment described.
+   That endpoint doesn't need or reliably accept that header, and every
+   request came back non-200 (silently `continue`d, never logged). The two
+   sibling fetch modules (`fetch_ics_advisories.py`, `fetch_attack_ics.py`)
+   hit the same raw CDN with no auth header at all and both worked (27,924
+   and 8,770 matched rows respectively) — a natural three-way comparison
+   that confirms the header, not the network, was the problem. **Fixed**:
+   the Authorization header is no longer sent; `fetch_vulnrichment.py` now
+   also prints a fetch-success-rate warning to stderr, and `qa.py` flags any
+   `--full` run whose remediation-text-present rate comes back under 5% as
+   implausible rather than letting it pass silently. **[VERIFY]** re-run the
+   `--full` pipeline with this fix before trusting any `no_patch_*` number —
+   the 0/27,924 result above must not be the one that ships.
+
 3. **v1.0's `product_class_taxonomy.yaml` was not oil & gas-specific.** It
    mapped only 3 classes to 7 generic industrial ICS vendors (Schneider,
    Rockwell, Siemens, ABB, Emerson, Honeywell, Yokogawa) by bare vendor name

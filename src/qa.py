@@ -33,11 +33,20 @@ def build_qa_report(df: pd.DataFrame, source_counts: dict) -> str:
     lines.append(f"KEV join: {kev_matched} of {n} rows are in the CISA KEV catalog ({_rate(kev_matched, n)}%)")
 
     remediation_present = int(df["vulnrichment_remediation_text_present"].sum()) if "vulnrichment_remediation_text_present" in df.columns else 0
+    remediation_pct = _rate(remediation_present, n)
     lines.append(
         f"Vulnrichment CNA solutions/workarounds text present: {remediation_present} of {n} rows "
-        f"({_rate(remediation_present, n)}%) — the rest are coded no_patch_basis="
+        f"({remediation_pct}%) — the rest are coded no_patch_basis="
         "'no_remediation_text_captured', not assumed patched (see LIMITATIONS.md)"
     )
+    if n and remediation_pct < 5.0:
+        lines.append(
+            f"  *** QA FLAG: {remediation_pct}% is implausibly low for a real --full run "
+            "(a near-zero rate on real data usually means every fetch request failed, e.g. "
+            "an unwanted auth header or blocked host, not that enrichment is genuinely absent "
+            "for nearly every CVE — check src/fetch_vulnrichment.py's stderr output for this run "
+            "before trusting no_patch_available on this dataset)."
+        )
 
     lines.append("\nProduct class distribution:")
     if "ong_product_class" in df.columns:
