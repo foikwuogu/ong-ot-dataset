@@ -36,14 +36,21 @@
 <p>
   v1.0 shipped with no-patch flagging that never actually fired on real data
   (it matched columns that don't exist in the real source), a product-class
-  taxonomy of generic industrial ICS vendors rather than oil &amp; gas-specific
-  ones, and an ATT&amp;CK for ICS fetch that was never joined into the dataset.
-  v1.1 fixes all three: no-patch flagging now reads real Vulnrichment CNA
-  remediation text, the taxonomy adds a curated oil &amp; gas product-family
-  class plus a narrow electric-adjacent class, and ATT&amp;CK for ICS
-  group/software profiles are now joined row-by-row where a product is
-  explicitly named in a threat profile's own description. Full detail in the
-  repository's <code>docs/</code> folder.
+  taxonomy that mapped <code>plc</code>/<code>rtu</code>/<code>scada</code>
+  to 7 generic industrial ICS vendors by bare vendor name rather than any
+  oil &amp; gas-specific product line, and an ATT&amp;CK for ICS fetch that
+  was never joined into the dataset. v1.1 fixes all three: no-patch flagging
+  now reads real Vulnrichment CNA remediation text; the taxonomy adds a
+  curated oil &amp; gas product-family class (<code>ong_product_line</code>,
+  weight 0.9) and re-scopes <code>plc</code>/<code>rtu</code>/<code>scada</code>
+  down to specific process-control platforms actually common in oil &amp;
+  gas/refining (Modicon/Foxboro, PlantPAx/ControlLogix, SIMATIC/PCS 7,
+  800xA/Freelance/RTU560, DeltaV/Ovation, Experion PKS, CENTUM/ProSafe;
+  weight raised 0.5&nbsp;&rarr;&nbsp;0.6), plus a narrow
+  <code>electric_adjacent</code> class for ONG/grid interconnection-point
+  equipment; and ATT&amp;CK for ICS group/software profiles are now joined
+  row-by-row where a product is explicitly named in a threat profile's own
+  description. Full detail in the repository's <code>docs/</code> folder.
 </p>
 
 <hr>

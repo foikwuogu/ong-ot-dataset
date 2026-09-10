@@ -35,13 +35,23 @@ honestly known about the data.
 
 3. **v1.0's `product_class_taxonomy.yaml` was not oil & gas-specific.** It
    mapped only 3 classes to 7 generic industrial ICS vendors (Schneider,
-   Rockwell, Siemens, ABB, Emerson, Honeywell, Yokogawa) — vendors that sell
-   into every ICS sector, not oil & gas specifically — so nearly all of
-   v1.0's 27,922 rows fell to `unmapped_default_weight: 0.0`. v1.1 adds a
-   genuinely oil & gas-specific `ong_product_line` class (curated
-   vendor/product-family allowlist: ROC800/FloBoss/ControlWave/Totalflow,
-   SCADAPack/RemoteConnect, ValveLink, Micro Motion, gas chromatographs,
-   tank-gauging systems, etc.) at the highest weight. **This is a curated
+   Rockwell, Siemens, ABB, Emerson, Honeywell, Yokogawa) by bare vendor name
+   — so an unrelated product from one of those vendors got the same
+   ONG-relevance weight as an oil & gas-specific one, and nearly all of
+   v1.0's 27,922 rows fell to `unmapped_default_weight: 0.0` anyway since the
+   list was so narrow. v1.1 fixes this twice: it adds a genuinely oil &
+   gas-specific `ong_product_line` class (curated vendor/product-family
+   allowlist: ROC800/FloBoss/ControlWave/Totalflow, SCADAPack/RemoteConnect,
+   ValveLink, Micro Motion, gas chromatographs, tank-gauging systems, etc.)
+   at the highest weight (0.9); and, per the author's explicit follow-up
+   request, re-scopes `plc`/`rtu`/`scada` from bare vendor name down to
+   specific process-control platforms those same vendors sell that are
+   actually common in oil & gas/refining (Modicon/Foxboro, PlantPAx/
+   ControlLogix, SIMATIC/PCS 7, 800xA/Freelance/RTU560, DeltaV/Ovation,
+   Experion PKS, CENTUM/ProSafe), raising their weight from 0.5 to 0.6 to
+   reflect the tighter scope while staying below `ong_product_line` (these
+   platforms are still shared with other process industries — chemicals,
+   pharma, water — not oil & gas-exclusive). **This is a curated
    judgment call, not a fetched fact — [VERIFY] the allowlist against your
    own field knowledge before this dataset is cited or published.**
 

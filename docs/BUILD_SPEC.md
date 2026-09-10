@@ -59,11 +59,19 @@ MEASURES (new or materially changed vs. v1.0 — full definitions in
 CODEBOOK.md):
   - ong_product_class / ong_product_weight — rebuilt taxonomy: a genuinely
     oil & gas-specific `ong_product_line` class (curated vendor/product
-    family allowlist, weight 0.9), the v1.0 generic vendor classes at a
-    reduced weight (0.5 — ONG-adjacent, not ONG-exclusive), and a new,
-    narrowly-scoped `electric_adjacent` class (weight 0.3) for equipment at
-    ONG/grid interconnection points specifically — **[VERIFY]** against
-    your own field knowledge.
+    family allowlist, weight 0.9); `plc`/`rtu`/`scada` re-scoped, per the
+    author's explicit follow-up request, from bare vendor name (v1.0 — any
+    Schneider/Rockwell/Siemens/ABB/Emerson/Honeywell/Yokogawa product
+    regardless of line) down to specific process-control platforms those
+    vendors sell that are actually common in oil & gas/refining (Modicon/
+    Foxboro, PlantPAx/ControlLogix, SIMATIC/PCS 7, 800xA/Freelance/RTU560,
+    DeltaV/Ovation, Experion PKS, CENTUM/ProSafe), weight raised from 0.5 to
+    0.6 to reflect that tighter scope while staying below `ong_product_line`
+    (these platforms are still shared with other process industries, not
+    oil & gas-exclusive); and a new, narrowly-scoped `electric_adjacent`
+    class (weight 0.3) for equipment at ONG/grid interconnection points
+    specifically — **[VERIFY]** every allowlist and weight against your own
+    field knowledge.
   - no_patch_available / no_patch_basis — v1.0's trigger checked a
     `Mitigation`/`Remediation` column that does not exist in the real ICS
     Advisory Project source (confirmed against the source's actual CSV

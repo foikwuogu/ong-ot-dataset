@@ -1,28 +1,34 @@
 # PRODUCT-CLASS TAXONOMY v1.1 — owned and defined by the client (Friday Ogochukwu Ikwuogu).
 #
-# CHANGED FROM v1.0: v1.0 had 3 classes mapped to 7 generic industrial ICS
-# vendors (Schneider, Rockwell, Siemens, ABB, Emerson, Honeywell, Yokogawa) —
-# not oil & gas-specific at all, so the vast majority of rows fell to
-# unmapped_default_weight (0.0). v1.1 adds a genuinely oil & gas-specific
-# `ong_product_line` class (curated vendor/product-family allowlist, matched
-# against Vendor + Product + Products_Affected + advisory title text, not
-# vendor alone) at the highest weight, keeps the v1.0 generic vendor classes
-# at a reduced weight (they are ONG-adjacent, not ONG-exclusive — these
-# vendors sell into every sector), and adds a narrowly-scoped
+# CHANGED FROM v1.0: v1.0 had 3 classes matched on bare vendor name alone —
+# Schneider, Rockwell, Siemens, ABB, Emerson, Honeywell, Yokogawa — with no
+# regard for which product line, so a completely unrelated product from one
+# of those vendors (e.g. a Rockwell historian with nothing to do with oil &
+# gas) got the same ONG-relevance weight as an oil & gas-specific one. v1.1
+# fixes this twice over: it adds a genuinely oil & gas-specific
+# `ong_product_line` class (curated vendor/product-family allowlist) at the
+# highest weight, AND — per the author's explicit follow-up request — scopes
+# `plc`/`rtu`/`scada` down from bare vendor name to specific process-control
+# platforms those same 7 vendors sell that are actually common in oil & gas /
+# refining (Modicon/Foxboro, PlantPAx/ControlLogix, SIMATIC/PCS 7, 800xA/
+# Freelance/RTU560, DeltaV/Ovation, Experion PKS, CENTUM/ProSafe) rather than
+# every product those vendors make. It also adds a narrowly-scoped
 # `electric_adjacent` class for equipment at oil & gas / electric-grid
-# interconnection points, per the author's scoping call (see BUILD_SPEC.md).
+# interconnection points, per the author's separate scoping call (see
+# BUILD_SPEC.md).
 #
-# [VERIFY] The author must confirm this allowlist and every weight against
-# their own field knowledge before this dataset is cited or published — this
-# is a curated judgment call, not a fetched fact. See VERIFY_CHECKLIST.md.
+# [VERIFY] The author must confirm every allowlist and weight against their
+# own field knowledge before this dataset is cited or published — this is a
+# curated judgment call, not a fetched fact. See VERIFY_CHECKLIST.md. Note
+# these platform names are still shared with other process industries
+# (chemicals, pharma, water) — "used in oil & gas" is not "exclusive to oil &
+# gas" — hence the lower weight than `ong_product_line`.
 #
 # Matching (src/join.py apply_product_class), in the order classes appear
 # below — first match wins:
 #   match: vendor_or_product              substring match against Vendor +
 #                                          Product + Products_Affected +
 #                                          ICS-CERT_Advisory_Title (case-insensitive)
-#   match: vendor_only                    substring match against Vendor only
-#                                          (kept from v1.0 for the generic classes)
 #   match: vendor_or_product_and_context  BOTH a product-family match AND a
 #                                          context keyword must hit — used only
 #                                          for electric_adjacent, by design
@@ -67,19 +73,36 @@ classes:
       # product family or asset type, not a sector-context word.
 
   plc:
-    weight: 0.5
-    match: vendor_only
-    vendors: [Schneider, Rockwell, Siemens]
+    weight: 0.6
+    match: vendor_or_product
+    vendors_products:
+      - Modicon          # Schneider Electric — control platform, widely used in oil & gas
+      - Foxboro          # Schneider Electric (acquired) — I/A Series DCS, heavily used in refining
+      - PlantPAx         # Rockwell Automation — process automation system
+      - ControlLogix     # Rockwell Automation
+      - CompactLogix     # Rockwell Automation
+      - SIMATIC          # Siemens
+      - PCS 7            # Siemens — process control system for process industries
 
   rtu:
-    weight: 0.5
-    match: vendor_only
-    vendors: [ABB, Emerson]
+    weight: 0.6
+    match: vendor_or_product
+    vendors_products:
+      - 800xA            # ABB
+      - Freelance        # ABB
+      - RTU560           # ABB
+      - Symphony Plus    # ABB
+      - DeltaV           # Emerson — DCS widely used in refining/oil & gas
+      - Ovation          # Emerson
 
   scada:
-    weight: 0.5
-    match: vendor_only
-    vendors: [Honeywell, Yokogawa]
+    weight: 0.6
+    match: vendor_or_product
+    vendors_products:
+      - Experion         # Honeywell — Experion PKS
+      - TDC 3000         # Honeywell — legacy DCS, still deployed in refining
+      - CENTUM           # Yokogawa — DCS widely used in oil & gas / LNG
+      - ProSafe          # Yokogawa — safety instrumented system
 
   electric_adjacent:
     weight: 0.3

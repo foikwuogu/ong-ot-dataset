@@ -48,10 +48,20 @@ author's sign-off:
    27,922 published rows. v1.1 matches against real Vulnrichment CNA
    solutions/workarounds text instead.
 2. **Product-class taxonomy wasn't oil & gas-specific.** v1.0 mapped 3
-   classes to 7 generic industrial ICS vendors. v1.1 adds a genuinely
-   curated oil & gas product-family taxonomy (`ong_product_line`) plus a
-   narrowly-scoped `electric_adjacent` class for equipment at ONG/grid
-   interconnection points.
+   classes (`plc`/`rtu`/`scada`) to 7 generic industrial ICS vendors by bare
+   vendor name — any product from Schneider, Rockwell, Siemens, ABB,
+   Emerson, Honeywell, or Yokogawa scored the same regardless of product
+   line. v1.1 fixes this twice: it adds a genuinely curated oil & gas
+   product-family class (`ong_product_line`, weight 0.9: ROC800/FloBoss/
+   ControlWave/Totalflow, SCADAPack, ValveLink, Micro Motion, tank gauging,
+   custody transfer, etc.); and, per the author's explicit follow-up
+   request, re-scopes `plc`/`rtu`/`scada` from bare vendor name down to
+   specific process-control platforms those same vendors sell that are
+   actually common in oil & gas/refining (Modicon/Foxboro, PlantPAx/
+   ControlLogix, SIMATIC/PCS 7, 800xA/Freelance/RTU560, DeltaV/Ovation,
+   Experion PKS, CENTUM/ProSafe), raising their weight from 0.5 to 0.6. It
+   also adds a narrowly-scoped `electric_adjacent` class (weight 0.3) for
+   equipment at ONG/grid interconnection points.
 3. **MITRE ATT&CK for ICS was fetched but never joined into the dataset.**
    v1.1 adds `attack_ics_matched_entity` / `_entity_type` / `_technique_ids`
    columns, populated only where a row's Product text is explicitly named in
