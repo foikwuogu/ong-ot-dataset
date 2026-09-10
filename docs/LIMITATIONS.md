@@ -108,6 +108,32 @@ honestly known about the data.
    **[VERIFY]** spot-check every row this produces once real data comes
    back — a distinctive-token match is still a heuristic, not a certainty.
 
+   **Update, 2026-09-10:** the first real `--full` run matched 8,770 of
+   27,924 rows (31.4%) — nowhere near "rare," and the top 10 matched
+   entities include FIN7, REvil, and Conficker: a financially-motivated
+   cybercrime group and two pieces of generic/ransomware malware, none of
+   them ICS-specific threat actors, alongside genuinely ICS-relevant hits
+   (PLC-Blaster, Stuxnet, INCONTROLLER, Dragonfly, OilRig). The `_demo`
+   fixture (7 rows) was structurally too small to ever have caught this —
+   the failure mode only shows up at real scale, where a short, generic
+   English word from a Product field (candidate culprits: something like
+   "card" for FIN7's payment-card focus, or "drive"/"backup" for
+   Conficker/REvil) can coincidentally appear inside a long, unrelated
+   entity's own STIX description, and `_GENERIC_TOKENS` — hand-curated
+   from ICS-domain vocabulary only — was never built to catch ordinary
+   English/IT words like these. **Fixed enough to diagnose, not yet fixed
+   outright**: `apply_attack_ics_match` and `build_dataset` now also
+   return/store `attack_ics_matched_token` (the literal word that fired
+   each match), and `qa.py` prints it alongside each top-10 entity and
+   flags any run matching over 15% of rows. **[VERIFY]** re-run `--full`
+   and read the new matched-token column for FIN7/REvil/Conficker rows
+   before deciding whether to (a) accept these as legitimate — MITRE's own
+   ATT&CK for ICS matrix does include some non-ICS-native
+   malware/ransomware as documented real-world OT-impact case studies, so
+   this is not automatically wrong — or (b) tighten `_GENERIC_TOKENS`
+   further (or require a longer minimum token length) once the exact
+   triggering words are visible.
+
 7. **Two of the four primary policy documents could not be automatically
    retrieved.** The CISA CPG 2.0 PDF and the TSA Security Directive
    Pipeline-2021-01G PDF both return HTTP 403 to automated fetch (likely

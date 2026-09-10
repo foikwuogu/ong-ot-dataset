@@ -162,7 +162,7 @@ def _distinctive_tokens(text: str) -> list[str]:
     return [t for t in tokens if t not in _GENERIC_TOKENS]
 
 
-def apply_attack_ics_match(product: str, entity_index: list[tuple[str, str, str, str]]) -> tuple[str, str, str]:
+def apply_attack_ics_match(product: str, entity_index: list[tuple[str, str, str, str]]) -> tuple[str, str, str, str]:
     """Tag with any ATT&CK for ICS group/software whose own STIX description
     contains a distinctive token from this row's Product text.
 
@@ -187,17 +187,25 @@ def apply_attack_ics_match(product: str, entity_index: list[tuple[str, str, str,
     group/software profiles and the ONG OT product landscape, not a
     pipeline defect (see LIMITATIONS.md).
 
-    Returns (attack_matched_entity, attack_entity_type, attack_technique_ids),
-    or ("", "", "") when nothing matches. Callers should memoize by product
-    — see build_dataset — since the same value repeats across many rows.
+    Returns (attack_matched_entity, attack_entity_type, attack_technique_ids,
+    attack_matched_token), or ("", "", "", "") when nothing matches. The
+    matched token is returned specifically so a run's QA report can show
+    *why* a match fired instead of just *that* it fired — see the
+    2026-09 finding in LIMITATIONS.md: real full-run output surfaced
+    non-ICS entities (FIN7, REvil, Conficker) in the top matches, which the
+    7-row demo fixture was too small to ever catch, and which cannot be
+    diagnosed from the entity name alone. Callers should memoize by
+    product — see build_dataset — since the same value repeats across many
+    rows.
     """
     tokens = _distinctive_tokens(product)
     if not tokens or not entity_index:
-        return "", "", ""
+        return "", "", "", ""
     for description, name, entity_type, technique_ids in entity_index:
-        if any(token in description for token in tokens):
-            return name, entity_type, technique_ids
-    return "", "", ""
+        for token in tokens:
+            if token in description:
+                return name, entity_type, technique_ids, token
+    return "", "", "", ""
 
 
 def build_dataset(
@@ -250,18 +258,20 @@ def build_dataset(
     df["cpg2_combined_risk_reduction"] = reductions
 
     entity_index = _attack_entity_index(groups_software)
-    match_cache: dict[str, tuple[str, str, str]] = {}
-    attack_entities, attack_types, attack_techniques = [], [], []
+    match_cache: dict[str, tuple[str, str, str, str]] = {}
+    attack_entities, attack_types, attack_techniques, attack_tokens = [], [], [], []
     for _, row in df.iterrows():
         key = str(row.get("Product", "") or "")
         if key not in match_cache:
             match_cache[key] = apply_attack_ics_match(key, entity_index)
-        entity, etype, techniques = match_cache[key]
+        entity, etype, techniques, token = match_cache[key]
         attack_entities.append(entity)
         attack_types.append(etype)
         attack_techniques.append(techniques)
+        attack_tokens.append(token)
     df["attack_ics_matched_entity"] = attack_entities
     df["attack_ics_entity_type"] = attack_types
     df["attack_ics_technique_ids"] = attack_techniques
+    df["attack_ics_matched_token"] = attack_tokens
 
     return df

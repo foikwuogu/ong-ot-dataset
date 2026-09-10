@@ -67,12 +67,28 @@ def build_qa_report(df: pd.DataFrame, source_counts: dict) -> str:
 
     lines.append("\nATT&CK for ICS group/software matches:")
     if "attack_ics_matched_entity" in df.columns:
-        matched = int((df["attack_ics_matched_entity"] != "").sum())
-        lines.append(f"  rows matched to a named group/software: {matched} of {n} ({_rate(matched, n)}%)")
+        matched_mask = df["attack_ics_matched_entity"] != ""
+        matched = int(matched_mask.sum())
+        match_pct = _rate(matched, n)
+        lines.append(f"  rows matched to a named group/software: {matched} of {n} ({match_pct}%)")
+        if n and match_pct > 15.0:
+            lines.append(
+                f"  *** QA FLAG: {match_pct}% is far above what a literal name-in-description "
+                "match against ICS-specific threat profiles should produce (see LIMITATIONS.md, "
+                "which expected this to be rare). Check the matched-token column below for each "
+                "top entity before trusting this — a short, coincidentally-shared word (e.g. "
+                "'card' matching a payment-fraud group's description) is a likelier explanation "
+                "than genuine ICS threat-actor overlap."
+            )
         if matched:
-            lines.append("  matched entities (top 10):")
-            for name, count in df.loc[df["attack_ics_matched_entity"] != "", "attack_ics_matched_entity"].value_counts().head(10).items():
-                lines.append(f"    {name}: {count}")
+            lines.append("  matched entities (top 10, with an example triggering token):")
+            has_token_col = "attack_ics_matched_token" in df.columns
+            for name, count in df.loc[matched_mask, "attack_ics_matched_entity"].value_counts().head(10).items():
+                token_note = ""
+                if has_token_col:
+                    tokens = df.loc[matched_mask & (df["attack_ics_matched_entity"] == name), "attack_ics_matched_token"].unique()
+                    token_note = f" — matched token(s): {', '.join(sorted(t for t in tokens if t)[:5])}"
+                lines.append(f"    {name}: {count}{token_note}")
 
     if "cvss_v3_base" in df.columns or "Cumulative_CVSS" in df.columns:
         cvss_col = "cvss_v3_base" if "cvss_v3_base" in df.columns else "Cumulative_CVSS"
