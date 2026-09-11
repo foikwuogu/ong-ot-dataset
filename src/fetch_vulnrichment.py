@@ -3,27 +3,39 @@ Fetch CISA Vulnrichment (ADP enrichment: CVSS, CWE, SSVC) per CVE.
 
 Source: https://github.com/cisagov/vulnrichment
 Layout: one JSON file per CVE, path-sharded by CVE year and the first digits
-of the number, e.g. cves/2024/21xxx/CVE-2024-21762.json.
+of the number, sitting directly at the repo root — e.g.
+2024/3xxx/CVE-2024-3400.json. Confirmed 2026-09-11 by fetching that exact
+path and inspecting its contents (containers.cna.solutions/workarounds
+present, as expected for a KEV-listed CVE).
 
 Because this repo is large, we only pull records for the CVE IDs the advisory
 join already needs, fetched directly from the raw content CDN
 (raw.githubusercontent.com) rather than the GitHub REST API. This matters:
-raw.githubusercontent.com is NOT the api.github.com "get contents" endpoint,
-is not subject to the 60/hour (unauthenticated) or 5,000/hour (authenticated)
-GitHub API rate limits, and — this is the bug fixed here — does not reliably
-accept a GitHub API Bearer token the way api.github.com does. A real v1.1
-`--full` run on 2026-09-10 sent the GitHub Actions job token
-(`${{ github.token }}`) as an `Authorization: Bearer` header on every one of
-these requests (inherited from code written for the api.github.com contents
-endpoint, then pointed at RAW_BASE without removing the header), and got
-`vulnrichment_remediation_text_present_pct = 0.0` across all 27,924 rows —
-i.e. every single fetch silently failed non-200 and was swallowed by the
-`continue` below. raw.githubusercontent.com serves public-repo content with
-no authentication required at all, so the header was pure downside. FIX:
-never send an Authorization header on these requests. If GitHub ever
-rate-limits this CDN path in practice, the real fix is to switch to the
-actual api.github.com contents endpoint (base64-decode the response) — not
-to keep sending a token this endpoint doesn't want.
+raw.githubusercontent.com is NOT the api.github.com "get contents" endpoint
+and is not subject to the 60/hour (unauthenticated) or 5,000/hour
+(authenticated) GitHub API rate limits, and does not need or reliably accept
+a GitHub API Bearer token — never send an Authorization header on these
+requests.
+
+TWO REAL BUGS, ONE SYMPTOM — both produced `vulnrichment_remediation_text_
+present_pct = 0.0` across all 27,924 rows on real `--full` runs, and had to
+be found one at a time because fixing the first didn't change the symptom:
+
+1. (Fixed 2026-09-10.) The GitHub Actions job token was sent as an
+   `Authorization: Bearer` header to raw.githubusercontent.com (inherited
+   from code written for the api.github.com contents endpoint, then pointed
+   at RAW_BASE without removing the header) — that host doesn't want it.
+   Removed. This did NOT fix the 0.0% result on the next real run, because:
+
+2. (Fixed 2026-09-11.) `_shard_path()` built paths with an extra `cves/`
+   prefix — `cves/2024/3xxx/CVE-2024-3400.json` — that does not exist in the
+   real repository; every single request 404'd regardless of the header.
+   The correct path has no `cves/` segment. This was never caught in
+   `--demo` testing (which reads a local fixture, no HTTP involved) and
+   wasn't verified against the live repo before the first real `--full` run
+   — see LIMITATIONS.md item 2 for the full incident writeup and the lesson
+   (verify the *exact* real URL against the live source before trusting a
+   fetch module, not just its response schema).
 
 CHANGED IN v1.1: the file served at this path is the FULL CVE Record (CNA
 container as originally submitted, plus CISA's own ADP container appended) —
@@ -52,7 +64,12 @@ def _shard_path(cve_id: str) -> str | None:
         return None
     year, number = m.groups()
     shard = number[:-3] + "xxx" if len(number) > 3 else "0xxx"
-    return f"cves/{year}/{shard}/{cve_id.upper()}.json"
+    # NOTE: no "cves/" prefix -- the real repo shards directly at the root,
+    # e.g. 2024/3xxx/CVE-2024-3400.json, NOT cves/2024/3xxx/CVE-2024-3400.json.
+    # See the module docstring for how this was confirmed and why the
+    # 2026-09-10/11 fix attempts (removing the Authorization header) didn't
+    # actually fix the 0-row result on their own.
+    return f"{year}/{shard}/{cve_id.upper()}.json"
 
 
 def _join_texts(entries: list) -> str:

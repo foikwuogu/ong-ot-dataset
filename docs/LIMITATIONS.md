@@ -36,23 +36,31 @@ honestly known about the data.
    **Update, 2026-09-10:** the first real `--full` run (on GitHub Actions)
    returned `vulnrichment_remediation_text_present_pct = 0.0` across all
    27,924 rows — every single Vulnrichment fetch silently failed. Root
-   cause: `src/fetch_vulnrichment.py` was sending the GitHub Actions job
-   token (`GITHUB_TOKEN`, wired into the workflow to raise the *API* rate
-   limit) as an `Authorization: Bearer` header on requests to
-   `raw.githubusercontent.com` — a public content CDN, not the
-   `api.github.com` contents endpoint the original code comment described.
-   That endpoint doesn't need or reliably accept that header, and every
-   request came back non-200 (silently `continue`d, never logged). The two
-   sibling fetch modules (`fetch_ics_advisories.py`, `fetch_attack_ics.py`)
-   hit the same raw CDN with no auth header at all and both worked (27,924
-   and 8,770 matched rows respectively) — a natural three-way comparison
-   that confirms the header, not the network, was the problem. **Fixed**:
-   the Authorization header is no longer sent; `fetch_vulnrichment.py` now
-   also prints a fetch-success-rate warning to stderr, and `qa.py` flags any
-   `--full` run whose remediation-text-present rate comes back under 5% as
-   implausible rather than letting it pass silently. **[VERIFY]** re-run the
-   `--full` pipeline with this fix before trusting any `no_patch_*` number —
-   the 0/27,924 result above must not be the one that ships.
+   cause (partial — see 2026-09-11 below): `src/fetch_vulnrichment.py` was
+   sending the GitHub Actions job token (`GITHUB_TOKEN`, wired into the
+   workflow to raise the *API* rate limit) as an `Authorization: Bearer`
+   header on requests to `raw.githubusercontent.com` — a public content
+   CDN, not the `api.github.com` contents endpoint the original code
+   comment described. That endpoint doesn't need or reliably accept that
+   header. Removed it; also added a fetch-success-rate stderr warning and a
+   `qa.py` flag for any run under 5% coverage.
+
+   **Update, 2026-09-11:** removing the header did NOT fix it — the re-run
+   still came back `0.0%`. The actual root cause was a second, independent
+   bug: `_shard_path()` built request paths with an extra `cves/` prefix
+   (`cves/2024/3xxx/CVE-2024-3400.json`), but the real repository shards
+   directly at the root (`2024/3xxx/CVE-2024-3400.json`, no `cves/`
+   segment) — every single request 404'd regardless of the header, for a
+   completely unrelated reason. Confirmed by fetching that exact corrected
+   path live and inspecting its contents (a KEV-listed CVE with real
+   `solutions`/`workarounds` text present, as expected). Neither bug was
+   catchable by `--demo` testing, which reads a static local fixture and
+   never makes an HTTP request — a real lesson for future fetch modules:
+   verify the *exact* URL against the live source before trusting the
+   module, not just its response schema against a hand-typed example.
+   **[VERIFY]** re-run `--full` with both fixes in place and confirm
+   `no_patch_available` is finally nonzero before trusting any `no_patch_*`
+   number — two zero-result runs in a row must not be the one that ships.
 
 3. **v1.0's `product_class_taxonomy.yaml` was not oil & gas-specific.** It
    mapped only 3 classes to 7 generic industrial ICS vendors (Schneider,
@@ -75,6 +83,17 @@ honestly known about the data.
    pharma, water — not oil & gas-exclusive). **This is a curated
    judgment call, not a fetched fact — [VERIFY] the allowlist against your
    own field knowledge before this dataset is cited or published.**
+
+   **Update, 2026-09-11:** a real `--full` run against the code *before*
+   the plc/rtu/scada re-scoping (bare vendor name, commit `86bb436`) showed
+   `plc` matching 14,316/27,924 rows (51.3%) — an unmapped-default-heavy
+   dataset was clearly not resulting. A second real run *with* the
+   re-scoping (commit `f343a32`) showed `plc` drop to 4,274/27,924 (15.3%)
+   and `unmapped` rise from 44.3% to 83.2% — the re-scoping fix worked as
+   intended on real data, not just the 7-row demo fixture. Still
+   **[VERIFY]** the specific platform list per the paragraph above; a lower
+   match rate confirms the fix narrowed matching, not that every remaining
+   match is correct.
 
 4. **The new `electric_adjacent` class is deliberately narrow and may match
    zero or very few rows in a given build.** Per the author's scoping
