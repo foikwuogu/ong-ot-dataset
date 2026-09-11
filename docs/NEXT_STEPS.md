@@ -32,3 +32,33 @@ order:
    goal ID the automated-fetch workaround got wrong** (LIMITATIONS.md item
    7) — this should happen before v1.1 ships, not deferred to v1.2, but is
    listed here as the standing item until it's done.
+7. **Replace the ATT&CK for ICS single-token match with something that
+   doesn't structurally whack-a-mole.** Three real `--full` runs on
+   2026-09-11 each fixed the top offenders in `_GENERIC_TOKENS` and each
+   time the match rate stayed well above the "rare" LIMITATIONS.md item 6
+   originally expected (31.4% -> 26.7% -> not yet re-measured after round
+   3), because any single-word match against a long free-text description
+   will eventually collide with *some* ordinary English word from *some*
+   row's Product field, and the blocklist can only ever be as complete as
+   the data seen so far. Two structural options, neither implemented
+   because neither could be validated against the real ATT&CK for ICS
+   bundle from the build environment (no network access to
+   raw.githubusercontent.com) without risking silently breaking a
+   confirmed true positive like TRITON's single-token match on
+   "triconex":
+   - **Require 2+ independently-matching tokens** from the same Product
+     string against the same entity description, not just one. Likely
+     kills most remaining generic-word collisions (two unrelated common
+     words both landing in the same description by chance is much rarer
+     than one) while probably still passing multi-word true positives
+     (PLC-Blaster: siemens+plcs; Triton: schneider+tricon+triconex).
+     Risk: could suppress a genuine match built on one very strong,
+     unambiguous token (e.g. a row whose Product field is just
+     "Triconex" alone, no second token) — would need real data to check
+     before shipping.
+   - **Score by token rarity (TF-IDF against the ATT&CK for ICS corpus)**
+     instead of binary inclusion, so common words contribute near-zero
+     match weight automatically instead of needing to be hand-listed.
+     More principled, more implementation and testing effort.
+   Whichever the author picks, re-validate with `--demo` first (does
+   TRITON still match on "triconex"?) before running `--full` again.

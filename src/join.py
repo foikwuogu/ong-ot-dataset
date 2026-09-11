@@ -144,19 +144,42 @@ def _attack_entity_index(groups_software: pd.DataFrame) -> list[tuple[str, str, 
 # entries. Only genuinely distinctive tokens (product/model names like
 # "triconex", "sel-451", "controlwave") should drive a match.
 #
-# Round 2 (2026-09-11, real --full run data): the first real run matched
-# 31.4% of rows -- LIMITATIONS.md item 6 expected "rare". The new
-# attack_ics_matched_token column showed exactly why: Dragonfly and APT38
-# were matching almost entirely on bare 4-digit numbers (2010, 2014, 2017,
-# 2019, 2020, 2021, 2022 -- these are years from the entities' own activity
-# history, not product identifiers), and REvil/FIN7/Conficker/OilRig were
-# matching on ordinary English/IT words ("family", "food", "cloud",
-# "carbon", "drives", "plant", "power", "computers", "ability", "comm",
-# "communication", "agent", "advisor") that a long STIX description will
-# contain somewhere almost by chance. Genuinely correct matches survive
-# this pass untouched: PLC-Blaster (siemens, plcs), VPNFilter (modbus --
-# a real ICS protocol), INCONTROLLER (codesys, omron -- INCONTROLLER/
-# PIPEDREAM is documented malware targeting exactly those).
+# Round 2 (2026-09-11, real --full run #2): the first real run matched
+# 31.4% of rows -- LIMITATIONS.md item 6 expected "rare". attack_ics_
+# matched_token showed exactly why: Dragonfly and APT38 were matching
+# almost entirely on bare 4-digit numbers (2010, 2014, 2017, 2019-2022 --
+# years from the entities' own activity history, not product identifiers),
+# and REvil/FIN7/Conficker/OilRig were matching on ordinary English/IT
+# words ("family", "food", "cloud", "carbon", "drives", "plant", "power",
+# "computers", "ability", "comm", "communication", "agent", "advisor")
+# that a long STIX description will contain somewhere almost by chance.
+#
+# Round 3 (2026-09-11, real --full run #3, same day): fixing round 2
+# dropped the rate to 26.7% -- still far from "rare" -- because the same
+# failure mode just promoted the NEXT generic-word collision into the top
+# 10: FIN7 (including/link/malware/medical/multiple), CyberAv3ngers
+# (asset/engage/health/healthcare/human), APT38 again (active/cisa/
+# endpoint/fire/general), FIN6 (card/data/hospital/mark/sold), and
+# Stuxnet's tokens (component/components/large/micro/micros) turned out to
+# be the SAME noise as round 2 despite being left alone as "possibly
+# legitimate" -- real data showed no sign of a genuine Stuxnet-specific
+# token ever surfacing, so that leniency was wrong and is corrected here.
+#
+# THIS IS STRUCTURALLY A WHACK-A-MOLE PROBLEM, not a bug that "gets fixed":
+# any curated blocklist of generic words is finite, and STIX descriptions
+# are long enough that some ordinary English word will eventually collide
+# with some row's Product field. Each round narrows it further and
+# confirmed-genuine matches (PLC-Blaster: siemens/plcs; VPNFilter: modbus;
+# INCONTROLLER: codesys/omron; Triton: schneider/tricon/triconex) have
+# survived every round untouched -- but do not expect this list to reach
+# zero false positives. See NEXT_STEPS.md for a real structural fix
+# (requiring 2+ independently-informative tokens per match, or scoring by
+# token rarity) that was NOT implemented here because it couldn't be
+# validated against the real bundle from this environment without risking
+# silently breaking a true positive like TRITON matching on "triconex"
+# alone. **[VERIFY]** treat every remaining match in qa_report.txt's top 10
+# as a hypothesis to spot-check, not a settled fact, however many rounds
+# of this list have run.
 _GENERIC_TOKENS = {
     "system", "systems", "safety", "instrumented", "controller", "controllers",
     "control", "series", "product", "products", "device", "devices", "module",
@@ -168,10 +191,29 @@ _GENERIC_TOKENS = {
     "affected", "electric", "electronic", "electronics", "engineering",
     "laboratories", "automation", "technologies", "industries", "incorporated",
     "company", "corp", "corporation", "international", "field", "process",
-    # added 2026-09-11 from real matched-token evidence (see note above):
+    # added 2026-09-11, round 2:
     "family", "food", "cloud", "carbon", "drives", "drive", "plant", "power",
     "computers", "computer", "ability", "comm", "communication", "communications",
     "agent", "advisor", "equip", "equipment", "base", "based",
+    # added 2026-09-11, round 3:
+    "including", "link", "links", "malware", "medical", "multiple", "asset",
+    "assets", "engage", "engaged", "engagement", "health", "healthcare",
+    "human", "active", "cisa", "endpoint", "endpoints", "fire", "general",
+    "card", "cards", "data", "hospital", "hospitals", "mark", "marked",
+    "sold", "component", "components", "large", "micro", "micros", "center",
+    "centers", "cure", "facts", "industrial", "infrastructure", "credential",
+    "credentials", "monitor", "monitoring", "custom", "dream", "sector",
+    "sectors", "energy", "several", "various", "related", "additional",
+    "known", "public", "publicly", "threat", "threats", "actor", "actors",
+    "campaign", "campaigns", "operation", "operations", "capability",
+    "capabilities", "target", "targets", "targeted", "targeting", "victim",
+    "victims", "report", "reported", "reports", "research", "researchers",
+    "group", "groups", "tool", "tools", "access", "exploit", "exploited",
+    "exploitation", "vulnerability", "vulnerabilities", "observed",
+    "identified", "believed", "likely", "possible", "potential", "other",
+    "others", "first", "since", "later", "early", "recent", "uses", "using",
+    "employ", "employed", "deploy", "deployed", "deployment", "information",
+    "technology", "government",
 }
 
 

@@ -171,14 +171,41 @@ honestly known about the data.
    pure letters, like "triconex" or "modbus"), and `_GENERIC_TOKENS` gained
    the specific English/IT words this run's data evidenced. Genuinely
    distinctive ICS terms (modbus, codesys, omron, siemens, triconex, etc.)
-   were deliberately left untouched. **Still open, [VERIFY] against your
-   own judgment**: Stuxnet matched on "advisor, component, components,
-   large, micro" and OilRig on "comm, communication" (now stoplisted) plus
-   "agent, based" (now stoplisted) — after this round's fix, re-run and
-   check whether Stuxnet's remaining tokens ("component"/"components"/
-   "large"/"micro" — not stoplisted, deliberately left for your call since
-   Stuxnet's real description does discuss Siemens system *components*)
-   still produce a defensible match or need one more round.
+   were deliberately left untouched.
+
+   **Update, 2026-09-11 (same day, round 3):** re-ran after the round-2
+   fix — match rate dropped 31.4% -> 26.7%, still far above "rare," because
+   the fix only removed the top offenders and let the next tier of
+   generic-word collisions rise into the top 10: FIN7 (including/link/
+   malware/medical/multiple), CyberAv3ngers (asset/engage/health/
+   healthcare/human), APT38 again (active/cisa/endpoint/fire/general),
+   FIN6 (card/data/hospital/mark/sold). Stuxnet's tokens
+   (component/components/large/micro/micros) turned out unchanged from
+   round 2 — the "maybe legitimate, Stuxnet's description does discuss
+   Siemens components" leniency from the note above was wrong; real data
+   showed zero sign of an actual Stuxnet-specific token, so these are now
+   stoplisted too. Fixed (round 3): a much larger, more conservative
+   stoplist addition covering both these specific words and preemptive
+   general security/IT vocabulary (threat, actor, campaign, victim,
+   exploit, vulnerability, sector, energy, etc.) likely to recur. Confirmed
+   genuinely correct matches survived every round: PLC-Blaster
+   (siemens/plcs), VPNFilter (modbus), INCONTROLLER (codesys/omron), and a
+   second entity, Triton (capitalization variant of TRITON in the real
+   ATT&CK for ICS data), matched correctly on schneider/tricon/triconex.
+
+   **This is structurally a whack-a-mole problem, not a bug with a final
+   fix.** A single-token substring match against long free-text
+   descriptions will always eventually collide with some ordinary word
+   from some row's Product field; the stoplist can only ever cover what
+   real data has shown so far. `docs/NEXT_STEPS.md` item 7 lays out two
+   real structural fixes (requiring 2+ corroborating tokens per match, or
+   TF-IDF-style rarity scoring) that were not implemented because neither
+   could be validated against the live ATT&CK for ICS bundle from this
+   build environment without risking a false negative on a confirmed true
+   positive (e.g. a row whose Product is just "Triconex" alone). **[VERIFY]**
+   whatever match rate the next `--full` run shows, read the top-10 list
+   with matched tokens every time — do not assume a lower number means the
+   list has become trustworthy without eyes on it.
 
 7. **Two of the four primary policy documents could not be automatically
    retrieved.** The CISA CPG 2.0 PDF and the TSA Security Directive
