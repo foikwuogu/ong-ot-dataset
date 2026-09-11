@@ -27,8 +27,20 @@ DRAFT_PATTERNS = [
     (re.compile(r"\[VERIFY[^\]]*\]"), "[VERIFY] tag"),
     (re.compile(r"\[ASK[^\]]*\]"), "[ASK] tag"),
     (re.compile(r"\[TARGET\]"), "[TARGET] tag (planning artifact, not publishable)"),
-    (re.compile(r"\[(insert|DOI|journal|tracking number|repository URL|n|date|name)[^\]]*\]", re.I),
+    (re.compile(r"\[(insert|journal|tracking number|repository URL|date|name)[^\]]*\](?!\()", re.I),
      "bracketed placeholder"),
+    # "DOI" and bare "n" need care: a real citation badge is literally
+    # `[DOI](url)` / `![DOI](url)`, and real source text (MITRE ATT&CK,
+    # ICS Advisory Project CSVs) contains innocuous brackets starting with
+    # "N" ("[Native API]", "[Note *1]"). Require at least one extra
+    # character inside the brackets for DOI (a bare "[DOI]" badge alone
+    # is fine; "[DOI: pending]" is not) and match "n" only as the exact,
+    # single-character placeholder some templates use, not any word
+    # starting with n/N. Both also exclude markdown link/image syntax via
+    # the negative lookahead, since a placeholder is never immediately
+    # followed by "(url)".
+    (re.compile(r"\[DOI[^\]]+\](?!\()", re.I), "bracketed placeholder"),
+    (re.compile(r"\[n\](?!\()"), "bracketed placeholder"),
     (re.compile(r"XXXX-XXXX|zenodo\.XXXX+"), "placeholder identifier"),
 ]
 SECRET_PATTERNS = [
@@ -40,8 +52,12 @@ REQUIRED = ["README.md", "LICENSE"]
 RECOMMENDED = ["CITATION.cff", ".gitignore"]
 
 
+SELF_PATH = os.path.relpath(os.path.abspath(__file__))
+
+
 def scan(root, allow_prefixes):
     blockers, warnings = [], []
+    self_rel = os.path.relpath(os.path.abspath(__file__), root)
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
         for fn in filenames:
@@ -60,6 +76,12 @@ def scan(root, allow_prefixes):
             for pat, label in SECRET_PATTERNS:
                 if pat.search(text):
                     blockers.append((rel, label))
+            # This script's own docstring/pattern table necessarily contains
+            # the literal tags it's built to detect ("DRAFT", "[VERIFY ...]",
+            # "[TARGET]", "XXXX-XXXX", ...); scanning itself for draft markers
+            # is a permanent false positive, not a real blocker.
+            if rel == self_rel:
+                continue
             allowed = any(rel.startswith(p) for p in allow_prefixes)
             for pat, label in DRAFT_PATTERNS:
                 m = pat.search(text)
