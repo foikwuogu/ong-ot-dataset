@@ -50,7 +50,7 @@ real `--full` output. v1.1's demo fixture uses the real column set.
 
 | Column | Type | Definition |
 |---|---|---|
-| `ong_product_class` | string | `ong_product_line`, `plc`, `rtu`, `scada`, `electric_adjacent`, or `unmapped` — see `config/product_class_taxonomy.yaml` for the exact matching rule per class and **[VERIFY]** the allowlist. |
+| `ong_product_class` | string | `ong_product_line`, `plc`, `rtu`, `scada`, `electric_adjacent`, or `unmapped` — see `config/product_class_taxonomy.yaml` for the exact matching rule per class. Allowlists and weights confirmed by the author 2026-09-11 against real `--full` output. |
 | `ong_product_weight` | float [0, 0.9] | The class's configured weight; `0.0` for unmapped. |
 | `no_patch_available` | boolean | `True` if any configured phrase matched `vulnrichment_remediation_text`. See `config/no_patch_rules.yaml`. |
 | `no_patch_basis` | string | `cna_text_match:<phrase>`, `cna_text_no_match`, or `no_remediation_text_captured` — always shows *why* the flag landed where it did, so "we have no signal" is never confused with "confirmed patched." |

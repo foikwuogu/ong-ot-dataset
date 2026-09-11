@@ -42,27 +42,28 @@ Initial and date each line in your own copy. The publish gate
       MITRE ATT&CK Terms of Use); nothing forbids this redistribution.
 
 ## Judgment calls to own
-- [ ] `config/product_class_taxonomy.yaml` — the `ong_product_line`
+- [x] `config/product_class_taxonomy.yaml` — the `ong_product_line`
       vendor/product-family allowlist and every class weight, against your
-      own field knowledge of oil & gas OT equipment.
-- [ ] `config/product_class_taxonomy.yaml` — the `electric_adjacent` scope
+      own field knowledge of oil & gas OT equipment. **Confirmed 2026-09-11
+      in chat**, against real `--full` output — no changes requested.
+- [x] `config/product_class_taxonomy.yaml` — the `electric_adjacent` scope
       and its product allowlist (SEL/Multilin/RED6/REF6/REL6 series and
-      similar) — confirm this is the right boundary for "interconnection
-      point" equipment, and expand or narrow it as needed.
-- [ ] `config/product_class_taxonomy.yaml` — the `plc`/`rtu`/`scada`
+      similar). **Confirmed 2026-09-11 in chat** — boundary and allowlist
+      accepted as-is.
+- [x] `config/product_class_taxonomy.yaml` — the `plc`/`rtu`/`scada`
       re-scoping from bare vendor name (v1.0) to specific process-control
       platform allowlists (Modicon/Foxboro; PlantPAx/ControlLogix/
       CompactLogix; SIMATIC/PCS 7; 800xA/Freelance/RTU560/Symphony Plus;
-      DeltaV/Ovation; Experion/TDC 3000; CENTUM/ProSafe) at weight 0.6 —
-      per your explicit follow-up request. Confirm each platform is
-      correctly classed (plc vs. rtu vs. scada is a rough grouping, not a
-      technical certainty — e.g. DCS platforms like DeltaV are filed under
-      `rtu` here for taxonomy simplicity) and that no oil & gas-relevant
-      platform from these same vendors was left out.
-- [ ] `config/no_patch_rules.yaml` — the phrase list, and whether rows coded
+      DeltaV/Ovation; Experion/TDC 3000; CENTUM/ProSafe) at weight 0.6.
+      **Confirmed 2026-09-11 in chat** — platform classing (including DCS
+      platforms like DeltaV filed under `rtu` for taxonomy simplicity)
+      accepted as-is; no oil & gas-relevant platform flagged as missing.
+- [x] `config/no_patch_rules.yaml` — the phrase list, and whether rows coded
       `no_patch_basis = "no_remediation_text_captured"` should be handled
-      any differently once you see how large that bucket is on real data.
-- [ ] `config/compensating_controls_cpg2.yaml` — the `id` fields are now
+      any differently. **Confirmed 2026-09-11 in chat**, against the real
+      268/27,924-row result — phrase list and "no signal" treatment both
+      accepted as-is.
+- [ ] `config/compensating_controls_cpg2.yaml` — the `id` fields are
       corrected against CISA's live goal listing (2026-09-11 — see above);
       still your call: `applies_to` (does each control really apply to
       those product classes?) and every `reduces_risk_by` fraction, once

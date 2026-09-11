@@ -4,19 +4,27 @@
 this project's build standard, so nothing downstream can outrun what is
 honestly known about the data.
 
-1. **No real `--full` run has been executed yet for v1.1.** The build
+1. **A real `--full` run against live sources is required before any row
+   count, match rate, or distribution can be cited** — the build
    environment used to write and test this pipeline has outbound network
-   access to `github.com`/`api.github.com` only — `cisa.gov`,
+   access to `github.com`/`api.github.com` only (`cisa.gov`,
    `epss.empiricalsecurity.com`, `api.first.org`, and
    `raw.githubusercontent.com` are all blocked by that environment's egress
-   policy. Every number produced so far comes from a small, hand-built demo
-   fixture (`data/raw/sample_*.csv`) used to verify the *logic* (does each
-   config rule fire the way it's meant to), not the real dataset. A real
-   `--full` run — via the repository's own GitHub Actions workflow, which
-   runs on unrestricted infrastructure — is required before any row count,
-   match rate, or distribution can be cited. **[VERIFY]** run it and replace
-   every number in this document set with the real output before
-   publication.
+   policy), so anything produced there comes from a small, hand-built demo
+   fixture (`data/raw/sample_*.csv`) that verifies the *logic* only, not the
+   real dataset. The repository's own GitHub Actions workflow, which runs
+   on unrestricted infrastructure, is the way to get a real run.
+
+   **Update, 2026-09-11:** three real `--full` runs have now happened via
+   that workflow (see items 2–3 below and `docs/v1.1-build-status` history
+   for the bugs each one surfaced and fixed). The current real numbers:
+   27,924 total rows, 5,937 Vulnrichment records fetched, 268 rows flagged
+   `no_patch_available = True`, `plc` matching 15.3% of rows, ATT&CK for ICS
+   matching 17.5%. **Still [VERIFY]:** these numbers, and every other one
+   quoted in `README.md`, `.zenodo/description.html`, or a manuscript if
+   one exists, still need to be mechanically re-derived from
+   `report/stats.json` after this run rather than hand-copied here — see
+   `docs/VERIFY_CHECKLIST.md`'s "Reproduce" section.
 
 2. **v1.0's `no_patch_available` never actually fired on real data.**
    `config/no_patch_rules.yaml` (v1.0) matched against `Mitigation` /
@@ -30,8 +38,7 @@ honestly known about the data.
    (see CODEBOOK.md) — a working signal, but a partial one: many CVE
    records simply have no solutions/workarounds field, which v1.1 records
    honestly as `no_patch_basis = "no_remediation_text_captured"` rather than
-   assuming a patch exists. **[VERIFY]** the phrase list and what share of
-   rows land in that "no signal" bucket once real data comes back.
+   assuming a patch exists.
 
    **Update, 2026-09-10:** the first real `--full` run (on GitHub Actions)
    returned `vulnrichment_remediation_text_present_pct = 0.0` across all
@@ -58,9 +65,14 @@ honestly known about the data.
    never makes an HTTP request — a real lesson for future fetch modules:
    verify the *exact* URL against the live source before trusting the
    module, not just its response schema against a hand-typed example.
-   **[VERIFY]** re-run `--full` with both fixes in place and confirm
-   `no_patch_available` is finally nonzero before trusting any `no_patch_*`
-   number — two zero-result runs in a row must not be the one that ships.
+
+   **Update, 2026-09-11 (confirmed):** the re-run with both fixes in place
+   returned 5,937 Vulnrichment records fetched and 268/27,924 rows flagged
+   `no_patch_available = True`, with a sane, auditable phrase-hit breakdown
+   in `qa_report.txt`. The author reviewed the phrase list above and the
+   "no signal" treatment for rows with no solutions/workarounds text at all
+   and confirmed both as-is, in chat, against this real output — see
+   `config/no_patch_rules.yaml`'s header comment.
 
 3. **v1.0's `product_class_taxonomy.yaml` was not oil & gas-specific.** It
    mapped only 3 classes to 7 generic industrial ICS vendors (Schneider,
@@ -80,9 +92,8 @@ honestly known about the data.
    Experion PKS, CENTUM/ProSafe), raising their weight from 0.5 to 0.6 to
    reflect the tighter scope while staying below `ong_product_line` (these
    platforms are still shared with other process industries — chemicals,
-   pharma, water — not oil & gas-exclusive). **This is a curated
-   judgment call, not a fetched fact — [VERIFY] the allowlist against your
-   own field knowledge before this dataset is cited or published.**
+   pharma, water — not oil & gas-exclusive). This is a curated judgment
+   call, not a fetched fact.
 
    **Update, 2026-09-11:** a real `--full` run against the code *before*
    the plc/rtu/scada re-scoping (bare vendor name, commit `86bb436`) showed
@@ -90,10 +101,11 @@ honestly known about the data.
    dataset was clearly not resulting. A second real run *with* the
    re-scoping (commit `f343a32`) showed `plc` drop to 4,274/27,924 (15.3%)
    and `unmapped` rise from 44.3% to 83.2% — the re-scoping fix worked as
-   intended on real data, not just the 7-row demo fixture. Still
-   **[VERIFY]** the specific platform list per the paragraph above; a lower
-   match rate confirms the fix narrowed matching, not that every remaining
-   match is correct.
+   intended on real data, not just the 7-row demo fixture. The author
+   reviewed the full allowlist and weight for every class (including the
+   plc/rtu/scada platform groupings) against this real output and confirmed
+   it as-is, in chat, no changes requested — see
+   `config/product_class_taxonomy.yaml`'s header comment.
 
 4. **The new `electric_adjacent` class is deliberately narrow and may match
    zero or very few rows in a given build.** Per the author's scoping
@@ -102,8 +114,9 @@ honestly known about the data.
    compressor station, etc.) in the same row — a real signal is rare in
    public advisory text at this level of specificity. A low or zero match
    count is the expected result of the narrow scope, not a pipeline defect.
-   **[VERIFY]** the product allowlist and the boundary itself against your
-   own field knowledge.
+   **Confirmed 2026-09-11:** the author reviewed the product allowlist and
+   the interconnection-point boundary itself, in chat, and confirmed it
+   as-is, no changes requested.
 
 5. **CVSS is advisory-level, not per-CVE.** `Cumulative_CVSS` is the
    worst/aggregate score CISA published for the whole advisory; when one

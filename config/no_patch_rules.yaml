@@ -17,11 +17,11 @@
 # published remediation text, when a CNA supplied one — are now fetched
 # (src/fetch_vulnrichment.py) and matched here.
 #
-# [VERIFY] This is a judgment call, not a fact to look up: which phrases
-# indicate no patch exists, and — separately — what it means when a CVE has
-# no `solutions`/`workarounds` text at all (this happens for a meaningful
-# share of records; it means "not captured by Vulnrichment," not "a patch
-# exists" — see LIMITATIONS.md). Confirm both before publication.
+# CONFIRMED 2026-09-11 by the author (Friday Ogochukwu Ikwuogu), in chat,
+# against real `--full` output (268/27,924 rows flagged True): the phrase
+# list below is complete as-is, and the "no signal" treatment for rows with
+# no solutions/workarounds text at all (coded `no_remediation_text_captured`,
+# not folded into True or False — see LIMITATIONS.md) is the right call.
 #
 # Trigger: cna_text_contains
 #   Case-insensitive substring match against the concatenation of
