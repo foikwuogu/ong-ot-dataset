@@ -153,6 +153,33 @@ honestly known about the data.
    further (or require a longer minimum token length) once the exact
    triggering words are visible.
 
+   **Update, 2026-09-11:** the matched-token column answered the question.
+   Dragonfly and APT38 were matching almost entirely on bare 4-digit years
+   (2010/2014/2017/2019/2020/2021/2022 — the entities' own activity-history
+   dates, not product identifiers); REvil matched on the single word
+   "family"; FIN7/Conficker/OilRig matched on ordinary English/IT words
+   ("food", "cloud", "carbon", "drives", "plant", "power", "computers",
+   "ability", "comm"/"communication", "agent", "advisor", "base"/"based")
+   that a long STIX description contains almost by chance. Meanwhile some
+   matches were confirmed genuinely correct by the same data: PLC-Blaster
+   via "siemens"/"plcs", VPNFilter via "modbus" (a real ICS protocol, not a
+   coincidence), and INCONTROLLER via "codesys"/"omron" (INCONTROLLER/
+   PIPEDREAM is documented malware that specifically targets CODESYS and
+   Omron products). **Fixed**: `_distinctive_tokens` now drops bare numeric
+   tokens entirely (a number alone is never a real product identifier —
+   real ones mix letters and digits, like "sel-451" or "s7-1500", or are
+   pure letters, like "triconex" or "modbus"), and `_GENERIC_TOKENS` gained
+   the specific English/IT words this run's data evidenced. Genuinely
+   distinctive ICS terms (modbus, codesys, omron, siemens, triconex, etc.)
+   were deliberately left untouched. **Still open, [VERIFY] against your
+   own judgment**: Stuxnet matched on "advisor, component, components,
+   large, micro" and OilRig on "comm, communication" (now stoplisted) plus
+   "agent, based" (now stoplisted) — after this round's fix, re-run and
+   check whether Stuxnet's remaining tokens ("component"/"components"/
+   "large"/"micro" — not stoplisted, deliberately left for your call since
+   Stuxnet's real description does discuss Siemens system *components*)
+   still produce a defensible match or need one more round.
+
 7. **Two of the four primary policy documents could not be automatically
    retrieved.** The CISA CPG 2.0 PDF and the TSA Security Directive
    Pipeline-2021-01G PDF both return HTTP 403 to automated fetch (likely

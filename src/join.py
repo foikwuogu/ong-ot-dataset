@@ -143,6 +143,20 @@ def _attack_entity_index(groups_software: pd.DataFrame) -> list[tuple[str, str, 
 # "protection" or "relay" alone, which appear in dozens of unrelated ATT&CK
 # entries. Only genuinely distinctive tokens (product/model names like
 # "triconex", "sel-451", "controlwave") should drive a match.
+#
+# Round 2 (2026-09-11, real --full run data): the first real run matched
+# 31.4% of rows -- LIMITATIONS.md item 6 expected "rare". The new
+# attack_ics_matched_token column showed exactly why: Dragonfly and APT38
+# were matching almost entirely on bare 4-digit numbers (2010, 2014, 2017,
+# 2019, 2020, 2021, 2022 -- these are years from the entities' own activity
+# history, not product identifiers), and REvil/FIN7/Conficker/OilRig were
+# matching on ordinary English/IT words ("family", "food", "cloud",
+# "carbon", "drives", "plant", "power", "computers", "ability", "comm",
+# "communication", "agent", "advisor") that a long STIX description will
+# contain somewhere almost by chance. Genuinely correct matches survive
+# this pass untouched: PLC-Blaster (siemens, plcs), VPNFilter (modbus --
+# a real ICS protocol), INCONTROLLER (codesys, omron -- INCONTROLLER/
+# PIPEDREAM is documented malware targeting exactly those).
 _GENERIC_TOKENS = {
     "system", "systems", "safety", "instrumented", "controller", "controllers",
     "control", "series", "product", "products", "device", "devices", "module",
@@ -154,12 +168,25 @@ _GENERIC_TOKENS = {
     "affected", "electric", "electronic", "electronics", "engineering",
     "laboratories", "automation", "technologies", "industries", "incorporated",
     "company", "corp", "corporation", "international", "field", "process",
+    # added 2026-09-11 from real matched-token evidence (see note above):
+    "family", "food", "cloud", "carbon", "drives", "drive", "plant", "power",
+    "computers", "computer", "ability", "comm", "communication", "communications",
+    "agent", "advisor", "equip", "equipment", "base", "based",
 }
 
 
 def _distinctive_tokens(text: str) -> list[str]:
     tokens = re.findall(r"[a-z0-9\-]{4,}", str(text or "").lower())
-    return [t for t in tokens if t not in _GENERIC_TOKENS]
+    return [
+        t for t in tokens
+        if t not in _GENERIC_TOKENS
+        # A bare number (e.g. a year like "2019", or a generic quantity)
+        # carries no real distinguishing power on its own -- real product
+        # identifiers mix letters and digits ("sel-451", "s7-1500") or are
+        # pure letters ("triconex", "modbus"). Added 2026-09-11 after real
+        # data showed Dragonfly/APT38 matching almost entirely on years.
+        and not t.isdigit()
+    ]
 
 
 def apply_attack_ics_match(product: str, entity_index: list[tuple[str, str, str, str]]) -> tuple[str, str, str, str]:
