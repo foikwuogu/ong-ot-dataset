@@ -208,15 +208,36 @@ honestly known about the data.
    list has become trustworthy without eyes on it.
 
 7. **Two of the four primary policy documents could not be automatically
-   retrieved.** The CISA CPG 2.0 PDF and the TSA Security Directive
+   retrieved as PDFs.** The CISA CPG 2.0 PDF and the TSA Security Directive
    Pipeline-2021-01G PDF both return HTTP 403 to automated fetch (likely
    bot-protection on cisa.gov/tsa.gov, not a redistribution restriction, and
-   the same issue v1.0's build notes hit). The CPG 2.0 goal IDs used in
-   `config/compensating_controls_cpg2.yaml` are reconstructed from CISA's
-   own CPG web pages and third-party summaries, cross-checked against one
-   another, NOT read from the primary PDF. **[VERIFY]** re-read the primary
-   document directly before publication and correct anything this
-   reconstruction got wrong.
+   the same issue v1.0's build notes hit).
+
+   **Update, 2026-09-11 (during verification):** although the CPG 2.0 PDF
+   itself is still unreachable, CISA's own goal-listing page
+   (cisa.gov/cross-sector-cybersecurity-performance-goals) *was* reachable
+   during verification and gave the real, current CPG 2.0 goal IDs. This
+   exposed a real error: every goal ID originally reconstructed for
+   `config/compensating_controls_cpg2.yaml` (CPG2-2A, CPG2-2C, CPG2-1B,
+   CPG2-3X-SEG, CPG2-1G, CPG2-2O) was wrong — the reconstruction had
+   assumed a 6-category "Govern/Identify/Protect/Detect/Respond/Recover"
+   structure with IDs numbered 1–7, but the real CPG 2.0 has only five
+   categories (Identify 1.*, Protect 2.*, Detect 3.A only, Respond 4.*,
+   Recover 5.A) and no ID above 5.*. Every control's underlying *concept*
+   and title had been matched correctly (asset inventory, network
+   segmentation, vendor/supplier requirements, no exploitable services, OT
+   leadership, known-vulnerability mitigation) — only the ID codes
+   themselves were fabricated-sounding placeholders that happened to read
+   as plausible CPG-style IDs. Corrected to the real IDs (1.A, 2.W, 1.C,
+   2.F, 1.I, 1.E respectively — see the config file's own header comment
+   for the full mapping). The TSA Security Directive PDF remained fully
+   unreachable (tsa.gov 403s even the general pipeline-cybersecurity
+   overview page, not just the PDF) — **[VERIFY]** this one is still
+   unconfirmed and needs the author's own read. **[VERIFY]** also confirm
+   the `reduces_risk_by` weight for each corrected control against the
+   full CPG 2.0 PDF's own risk guidance, not just the goal titles — the web
+   listing gave IDs and titles, not CISA's stated risk-reduction rationale
+   per goal.
 
 8. **Single point-in-time pull, once `--full` is run.** EPSS scores, KEV
    membership, and Vulnrichment enrichment all change over time. Every value

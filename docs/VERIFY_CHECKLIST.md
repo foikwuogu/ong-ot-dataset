@@ -21,12 +21,20 @@ Initial and date each line in your own copy. The publish gate
       the `--full` run.
 
 ## Source-level checks
-- [ ] Re-read the primary CISA CPG 2.0 PDF and TSA Security Directive
-      Pipeline-2021-01G PDF directly (both returned HTTP 403 to every
-      automated fetch attempted during this build) and correct any goal ID
-      or claim in `config/compensating_controls_cpg2.yaml`,
-      `docs/BUILD_SPEC.md`, or the README that this reconstruction got
-      wrong.
+- [x] **CPG 2.0 goal IDs corrected 2026-09-11** using CISA's live goal
+      listing page (cisa.gov/cross-sector-cybersecurity-performance-goals),
+      which became fetchable during verification even though the full PDF
+      still 403s. Every ID in `config/compensating_controls_cpg2.yaml` was
+      wrong (assumed a 6-category scheme; the real one has 5) and is now
+      fixed — see that file's header comment and LIMITATIONS.md item 7 for
+      the before/after mapping. **Still needed from you:** open the actual
+      CPG 2.0 PDF yourself and confirm the `reduces_risk_by` fractions
+      against CISA's own risk-reduction guidance per goal — the web listing
+      gave IDs and titles only, not that.
+- [ ] Re-read the TSA Security Directive Pipeline-2021-01G PDF directly —
+      this one is still fully unreachable by any automated means tried
+      (tsa.gov 403s even its general overview pages) — and correct any
+      claim in `docs/BUILD_SPEC.md` or the README that references it.
 - [ ] Source vintages confirmed current as of the `--full` run date; newer
       releases of any of the five data sources noted if they exist.
 - [ ] Licenses and terms of every source re-read (ICS Advisory Project
@@ -54,9 +62,11 @@ Initial and date each line in your own copy. The publish gate
 - [ ] `config/no_patch_rules.yaml` — the phrase list, and whether rows coded
       `no_patch_basis = "no_remediation_text_captured"` should be handled
       any differently once you see how large that bucket is on real data.
-- [ ] `config/compensating_controls_cpg2.yaml` — every control's `id`,
-      `applies_to`, and `reduces_risk_by` value, once the primary CPG 2.0
-      PDF has been read directly.
+- [ ] `config/compensating_controls_cpg2.yaml` — the `id` fields are now
+      corrected against CISA's live goal listing (2026-09-11 — see above);
+      still your call: `applies_to` (does each control really apply to
+      those product classes?) and every `reduces_risk_by` fraction, once
+      you've read the primary CPG 2.0 PDF's own risk-reduction guidance.
 - [ ] `attack_ics_matched_entity` — spot-check every row this produces on
       the real `--full` output; a distinctive-token match is a heuristic
       (see `src/join.py:apply_attack_ics_match`), not a certified
