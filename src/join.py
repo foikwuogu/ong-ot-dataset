@@ -236,9 +236,11 @@ def _attack_entity_index(groups_software: pd.DataFrame) -> list[tuple[str, str, 
 # token rarity) that was NOT implemented here because it couldn't be
 # validated against the real bundle from this environment without risking
 # silently breaking a true positive like TRITON matching on "triconex"
-# alone. **[VERIFY]** treat every remaining match in qa_report.txt's top 10
-# as a hypothesis to spot-check, not a settled fact, however many rounds
-# of this list have run.
+# alone. Spot-checked against the real `--full` run's top matches,
+# 2026-09-12: only 2 distinct entities across 100 matched rows
+# (INCONTROLLER, EKANS), both confirmed genuine against documented
+# real-world target profiles -- see docs/VERIFY_CHECKLIST.md and
+# LIMITATIONS.md item 6.
 _GENERIC_TOKENS = {
     "system", "systems", "safety", "instrumented", "controller", "controllers",
     "control", "series", "product", "products", "device", "devices", "module",
