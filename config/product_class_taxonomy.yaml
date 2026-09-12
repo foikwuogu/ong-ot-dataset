@@ -1,20 +1,135 @@
-# PRODUCT-CLASS TAXONOMY — owned and defined by the client (Friday Ogochukwu Ikwuogu).
+# PRODUCT-CLASS TAXONOMY v1.1 — owned and defined by the client (Friday Ogochukwu Ikwuogu).
 #
-# Matching is by vendor name against the ICS Advisory Project's Vendor column
-# (case-insensitive substring match — see src/join.py).
+# CHANGED FROM v1.0: v1.0 had 3 classes matched on bare vendor name alone —
+# Schneider, Rockwell, Siemens, ABB, Emerson, Honeywell, Yokogawa — with no
+# regard for which product line, so a completely unrelated product from one
+# of those vendors (e.g. a Rockwell historian with nothing to do with oil &
+# gas) got the same ONG-relevance weight as an oil & gas-specific one. v1.1
+# fixes this twice over: it adds a genuinely oil & gas-specific
+# `ong_product_line` class (curated vendor/product-family allowlist) at the
+# highest weight, AND — per the author's explicit follow-up request — scopes
+# `plc`/`rtu`/`scada` down from bare vendor name to specific process-control
+# platforms those same 7 vendors sell that are actually common in oil & gas /
+# refining (Modicon/Foxboro, PlantPAx/ControlLogix, SIMATIC/PCS 7, 800xA/
+# Freelance/RTU560, DeltaV/Ovation, Experion PKS, CENTUM/ProSafe) rather than
+# every product those vendors make. It also adds a narrowly-scoped
+# `electric_adjacent` class for equipment at oil & gas / electric-grid
+# interconnection points, per the author's separate scoping call (see
+# BUILD_SPEC.md).
+#
+# CONFIRMED 2026-09-11 by the author (Friday Ogochukwu Ikwuogu), in chat,
+# against real `--full` output: every allowlist and weight below (including
+# `electric_adjacent`'s scope) reviewed and accepted as-is, no changes
+# requested. This is still a curated judgment call, not a fetched fact — if
+# a future build adds platforms or vendors, re-confirm the same way. Note
+# these platform names are still shared with other process industries
+# (chemicals, pharma, water) — "used in oil & gas" is not "exclusive to oil &
+# gas" — hence the lower weight than `ong_product_line`.
+#
+# Matching (src/join.py apply_product_class), in the order classes appear
+# below — first match wins:
+#   match: vendor_or_product              substring match against Vendor +
+#                                          Product + Products_Affected +
+#                                          ICS-CERT_Advisory_Title (case-insensitive)
+#   match: vendor_or_product_and_context  BOTH a product-family match AND a
+#                                          context keyword must hit — used only
+#                                          for electric_adjacent, by design
+#                                          narrow (see LIMITATIONS.md; 0 matches
+#                                          in a given build is expected, not a bug)
 
 classes:
-  plc:
+  ong_product_line:
     weight: 0.9
-    vendors: [Schneider, Rockwell, Siemens]
+    match: vendor_or_product
+    vendors_products:
+      # RTU / flow-computer / gas-measurement product families (Emerson /
+      # Remote Automation Solutions and legacy Bristol Babcock lines)
+      - ROC800
+      - ROC800L
+      - DL8000
+      - FloBoss
+      - ControlWave
+      - OpenBSI
+      - Totalflow
+      # Pipeline SCADA / RTU families
+      - SCADAPack
+      - RemoteConnect
+      - Telvent
+      # Valve / actuator control
+      - ValveLink
+      # Flow measurement / custody transfer / tank gauging
+      - Micro Motion
+      - gas chromatograph
+      - Enraf
+      - Varec
+      - Toptech
+      - tank gauging
+      - custody transfer
+      - flow computer
+      - wellhead
+      # NOTE: deliberately does NOT include generic context words like
+      # "pipeline", "midstream", "upstream", or "compressor station" — those
+      # collide with electric_adjacent's context_keywords below (a protection
+      # relay advisory that merely mentions "compressor station" is not an
+      # oil & gas-specific *product*). Every entry here names an actual
+      # product family or asset type, not a sector-context word.
+
+  plc:
+    weight: 0.6
+    match: vendor_or_product
+    vendors_products:
+      - Modicon          # Schneider Electric — control platform, widely used in oil & gas
+      - Foxboro          # Schneider Electric (acquired) — I/A Series DCS, heavily used in refining
+      - PlantPAx         # Rockwell Automation — process automation system
+      - ControlLogix     # Rockwell Automation
+      - CompactLogix     # Rockwell Automation
+      - SIMATIC          # Siemens
+      - PCS 7            # Siemens — process control system for process industries
 
   rtu:
-    weight: 0.8
-    vendors: [ABB, Emerson]
+    weight: 0.6
+    match: vendor_or_product
+    vendors_products:
+      - 800xA            # ABB
+      - Freelance        # ABB
+      - RTU560           # ABB
+      - Symphony Plus    # ABB
+      - DeltaV           # Emerson — DCS widely used in refining/oil & gas
+      - Ovation          # Emerson
 
   scada:
-    weight: 0.7
-    vendors: [Honeywell, Yokogawa]
+    weight: 0.6
+    match: vendor_or_product
+    vendors_products:
+      - Experion         # Honeywell — Experion PKS
+      - TDC 3000         # Honeywell — legacy DCS, still deployed in refining
+      - CENTUM           # Yokogawa — DCS widely used in oil & gas / LNG
+      - ProSafe          # Yokogawa — safety instrumented system
 
-# Fallback behavior for vendors not listed above:
+  electric_adjacent:
+    weight: 0.3
+    match: vendor_or_product_and_context
+    # Narrow by design (author's scoping call): protection-relay / interconnection
+    # product families commonly deployed at ONG/grid interconnection points
+    # (e.g. compressor-station power feeds, pipeline-to-grid metering).
+    # CONFIRMED 2026-09-11 by the author, in chat: this scope and product
+    # list reviewed and accepted as-is.
+    vendors_products:
+      - SEL-4
+      - SEL-3
+      - SEL-7
+      - Multilin
+      - protection relay
+      - RED6
+      - REF6
+      - REL6
+    context_keywords:
+      - interconnection
+      - point of interconnection
+      - grid tie
+      - grid-tie
+      - compressor station
+      - substation
+
+# Fallback behavior for rows matching none of the classes above:
 unmapped_default_weight: 0.0

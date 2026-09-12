@@ -1,0 +1,3 @@
+stix_id,entity_type,name,description,external_id,technique_ids
+malware--triton-demo,software,TRITON,"TRITON is malware designed to manipulate industrial safety systems. TRITON has targeted Schneider Electric's Triconex safety instrumented system (SIS) controllers, reprogramming Tricon safety controllers.",S0603,"T0800, T0836, T0821"
+malware--industroyer2-demo,software,INDUSTROYER2,"INDUSTROYER2 is designed to target and manipulate protection relays used in electric transmission substations, capable of issuing unauthorized commands to protection relay devices.",S1072,"T0855, T0806"

@@ -1,0 +1,6 @@
+2026-09-12 | ics_advisories_v1.1.csv | 25200279 bytes | sha256:3b78946510ea66a2d5ada37864c4351d613ea63b5b6616ce6b6cc371ec805251 | https://github.com/icsadvprj/ICS-Advisory-Project (ODbL v1.0) | source=ics_advisories
+2026-09-12 | kev_v1.1.csv | 1066925 bytes | sha256:d932fad9787e94ca12fc2c401ff7453970a0701d89b1dafe8dfa7f2b3b1e9648 | https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json | source=kev
+2026-09-12 | epss_v1.1.csv | 593478 bytes | sha256:2bb460850c9636aecaa73dced84a5e6093c2bf10356d3812cc655a1e90ec2c9e | https://epss.empiricalsecurity.com/epss_scores-current.csv.gz | source=epss
+2026-09-12 | vulnrichment_v1.1.csv | 2529836 bytes | sha256:e781f5e96923588c44a8a4260257a2cc970770299b8eac19f0461852d76965de | https://github.com/cisagov/vulnrichment | source=vulnrichment
+2026-09-12 | attack_ics_techniques.csv | 119148 bytes | sha256:d01665feb6843191be89bf3640635757285fb7b42c3b17f65a356015988e39d8 | https://github.com/mitre-attack/attack-stix-data/tree/master/ics-attack | source=attack_ics
+2026-09-12 | attack_ics_groups_software.csv | 28220 bytes | sha256:06b8085beee0fe421df4c4b11b394a0ab03c853e468e31f85d8a6890d4803af3 | https://github.com/mitre-attack/attack-stix-data/tree/master/ics-attack | source=attack_ics

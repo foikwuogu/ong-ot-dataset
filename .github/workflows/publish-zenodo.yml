@@ -1,18 +1,39 @@
 name: Build and publish dataset to Zenodo
 
+# CHANGED IN v1.1: the "Create Zenodo deposition" step always created a
+# brand-new deposition via POST /deposit/depositions, which mints an
+# unrelated new DOI on every run instead of a new version of the existing
+# record. Running v1.0's workflow again for v1.1 would NOT have produced
+# "v1.1 of 10.5281/zenodo.22503185" — it would have produced a second,
+# disconnected dataset with its own DOI. This version calls Zenodo's
+# newversion action on the existing record first, so releases land as
+# versions under one concept DOI (what Zenodo's own versioning UI and the
+# GitHub-Zenodo integration both do). See docs/VERIFY_CHECKLIST.md: test
+# against the Zenodo sandbox before running this against the production
+# record.
+
 on:
   workflow_dispatch:
     inputs:
       version:
         description: Dataset version used in output filenames
         required: true
-        default: v1.0
+        default: v1.1
         type: string
       publish:
         description: Publish the Zenodo deposition after upload
         required: true
         default: false
         type: boolean
+      existing_record_id:
+        description: >
+          Zenodo record ID to create a new version of. Leave blank only for
+          a genuinely first-ever deposition (this repository already has
+          one — 22503185 — so leave the default unless you mean to start an
+          unrelated new record).
+        required: false
+        default: '22503185'
+        type: string
   release:
     types: [published]
 
@@ -30,6 +51,7 @@ jobs:
     env:
       ZENODO_API_URL: ${{ vars.ZENODO_API_URL || 'https://zenodo.org/api' }}
       ZENODO_ACCESS_TOKEN: ${{ secrets.ZENODO_ACCESS_TOKEN }}
+      EXISTING_RECORD_ID: ${{ inputs.existing_record_id || '22503185' }}
 
     steps:
       - name: Check out repository
@@ -73,6 +95,9 @@ jobs:
           path: |
             data/processed/ong_ot_dataset_${{ steps.version.outputs.value }}.csv
             data/processed/ong_ot_dataset_${{ steps.version.outputs.value }}_manifest.json
+            data/processed/qa_report.txt
+            report/stats.json
+            data/raw/PROVENANCE.txt
           if-no-files-found: error
           retention-days: 90
 
@@ -83,37 +108,83 @@ jobs:
             exit 1
           fi
 
-      - name: Create Zenodo deposition
+      - name: Create or version Zenodo deposition
         id: deposition
         env:
           VERSION: ${{ steps.version.outputs.value }}
           REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
         run: |
+          set -euo pipefail
+
+          if [[ -n "$EXISTING_RECORD_ID" ]]; then
+            echo "Creating a new version of existing record $EXISTING_RECORD_ID..."
+            newversion_response=$(curl --fail-with-body --silent --show-error \
+              --request POST \
+              --header "Authorization: Bearer $ZENODO_ACCESS_TOKEN" \
+              "$ZENODO_API_URL/deposit/depositions/$EXISTING_RECORD_ID/actions/newversion")
+            draft_url=$(jq -er '.links.latest_draft' <<< "$newversion_response")
+
+            draft=$(curl --fail-with-body --silent --show-error \
+              --header "Authorization: Bearer $ZENODO_ACCESS_TOKEN" \
+              "$draft_url")
+            deposition_id=$(jq -er '.id' <<< "$draft")
+            bucket_url=$(jq -er '.links.bucket' <<< "$draft")
+
+            # A "newversion" draft starts as a copy of the previous version's
+            # files. Remove them before uploading this version's files, or
+            # the release ends up with every prior version's files attached.
+            echo "Removing carried-over files from the new draft..."
+            jq -c '.files[]? // empty' <<< "$draft" | while read -r file; do
+              file_id=$(jq -r '.id' <<< "$file")
+              curl --fail-with-body --silent --show-error \
+                --request DELETE \
+                --header "Authorization: Bearer $ZENODO_ACCESS_TOKEN" \
+                "$ZENODO_API_URL/deposit/depositions/$deposition_id/files/$file_id"
+            done
+          else
+            echo "No existing_record_id given — creating a brand-new deposition."
+            create_response=$(curl --fail-with-body --silent --show-error \
+              --request POST \
+              --header "Authorization: Bearer $ZENODO_ACCESS_TOKEN" \
+              --header "Content-Type: application/json" \
+              --data '{}' \
+              "$ZENODO_API_URL/deposit/depositions")
+            deposition_id=$(jq -er '.id' <<< "$create_response")
+            bucket_url=$(jq -er '.links.bucket' <<< "$create_response")
+          fi
+
           metadata=$(jq -n \
             --arg title "ONG-OT Vulnerability Prioritization Dataset $VERSION" \
             --rawfile description .zenodo/description.html \
             --arg name "Friday Ogochukwu Ikwuogu" \
             --arg orcid "0009-0009-2222-1318" \
             --arg affiliation "Independent Researcher, Odessa, Texas, USA" \
+            --arg silas "Silas Abutu" \
+            --arg silas_aff "Petroleum Training Institute, Effurun, Delta State, Nigeria" \
+            --arg abidemi "Abidemi Orimogunje" \
+            --arg abidemi_aff "Redeemer's University, Ede, Osun State, Nigeria" \
             --arg repository "$REPOSITORY_URL" \
             '{metadata: {
               title: $title,
               upload_type: "dataset",
               description: $description,
-              creators: [{name: $name, orcid: $orcid, affiliation: $affiliation}],
+              creators: [
+                {name: $name, orcid: $orcid, affiliation: $affiliation},
+                {name: $silas, affiliation: $silas_aff},
+                {name: $abidemi, affiliation: $abidemi_aff}
+              ],
               access_right: "open",
               license: "odbl-1.0",
               version: env.VERSION,
               related_identifiers: [{identifier: $repository, relation: "isSupplementTo", scheme: "url"}]
             }}')
-          response=$(curl --fail-with-body --silent --show-error \
-            --request POST \
+          curl --fail-with-body --silent --show-error \
+            --request PUT \
             --header "Authorization: Bearer $ZENODO_ACCESS_TOKEN" \
             --header "Content-Type: application/json" \
             --data "$metadata" \
-            "$ZENODO_API_URL/deposit/depositions")
-          deposition_id=$(jq -er '.id' <<< "$response")
-          bucket_url=$(jq -er '.links.bucket' <<< "$response")
+            "$ZENODO_API_URL/deposit/depositions/$deposition_id" > /dev/null
+
           echo "id=$deposition_id" >> "$GITHUB_OUTPUT"
           echo "bucket_url=$bucket_url" >> "$GITHUB_OUTPUT"
 
@@ -124,7 +195,9 @@ jobs:
         run: |
           for file in \
             "data/processed/ong_ot_dataset_${VERSION}.csv" \
-            "data/processed/ong_ot_dataset_${VERSION}_manifest.json"; do
+            "data/processed/ong_ot_dataset_${VERSION}_manifest.json" \
+            "data/processed/qa_report.txt" \
+            "report/stats.json"; do
             curl --fail-with-body --silent --show-error \
               --request PUT \
               --header "Authorization: Bearer $ZENODO_ACCESS_TOKEN" \
@@ -155,7 +228,7 @@ jobs:
           {
             echo "## ONG-OT dataset $VERSION"
             echo
-            echo "Zenodo deposition: $DEPOSITION_ID"
+            echo "Zenodo deposition: $DEPOSITION_ID (new version of $EXISTING_RECORD_ID)"
             if [[ -n "$DOI" ]]; then
               echo "DOI: $DOI"
               echo "Record: $RECORD_URL"

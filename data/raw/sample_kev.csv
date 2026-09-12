@@ -1,3 +1,4 @@
 cve_id,vendorProject,product,vulnerabilityName,dateAdded,knownRansomwareCampaignUse
 CVE-2024-21762,Fortinet,FortiOS,Fortinet FortiOS Out-of-Bounds Write Vulnerability,2024-02-09,Unknown
 CVE-2023-6448,Unitronics,Vision Series PLC,Unitronics Vision Series Default Credentials,2024-01-24,Unknown
+CVE-2025-30001,Schneider Electric,Triconex Tricon,Schneider Electric Triconex Tricon Deserialization Vulnerability,2025-05-25,Unknown
