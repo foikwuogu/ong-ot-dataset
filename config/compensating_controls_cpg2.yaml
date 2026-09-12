@@ -1,15 +1,118 @@
-# COMPENSATING CONTROLS, MAPPED TO CISA CPG 2.0 — owned and defined by the
-# client (Friday Ogochukwu Ikwuogu).
+# COMPENSATING CONTROLS, MAPPED TO CISA CPG 2.0 — v1.1 — owned and defined by
+# the client (Friday Ogochukwu Ikwuogu).
+#
+# CHANGED FROM v1.0: v1.0 had 2 controls covering 2 of 3 product classes — a
+# placeholder, not a real crosswalk. v1.1 expands to a control per relevant
+# CPG 2.0 goal area, covering every class in the v1.1 taxonomy including the
+# new `ong_product_line` and `electric_adjacent` classes.
+#
+# UPDATE 2026-09-11: every goal ID below was WRONG in the first v1.1 draft.
+# The IDs (CPG2-2A, CPG2-2C, CPG2-1B, CPG2-3X-SEG, CPG2-1G, CPG2-2O) were
+# reconstructed from third-party summaries during the build, when the
+# primary cisa.gov pages returned HTTP 403 to every automated fetch tried at
+# that time. During verification, cisa.gov/cross-sector-cybersecurity-
+# performance-goals became fetchable and confirmed the REAL CPG 2.0
+# structure has only five categories -- Identify (1.*), Protect (2.*),
+# Detect (3.A only), Respond (4.*), Recover (5.A) -- with no separate
+# "Govern" category and no IDs above 5.*, contradicting the original
+# reconstruction's assumed 6-category/1-7 scheme entirely. Every control
+# below was correctly matched to a real CPG 2.0 concept and title (asset
+# inventory, network segmentation, vendor/supplier requirements, no
+# exploitable services, OT leadership, known-vulnerability mitigation) --
+# only the ID codes were wrong. Corrected to the real IDs:
+#   CPG2-2A     -> 1.A  (Asset Inventory)
+#   CPG2-2C     -> 2.W  (No Exploitable Services on the Internet)
+#   CPG2-1B     -> 1.C  (OT Cybersecurity Leadership)
+#   CPG2-3X-SEG -> 2.F  (Network Segmentation)
+#   CPG2-1G     -> 1.I  (Vendor/Supplier Cybersecurity Requirements)
+#   CPG2-2O     -> 1.E  (Mitigating Known Vulnerabilities)
+# Source: cisa.gov/cross-sector-cybersecurity-performance-goals (fetched
+# 2026-09-11). This is CISA's own goal listing page, not the full CPG 2.0
+# PDF report itself (which, like the TSA Security Directive PDF, still
+# returns 403 to automated fetch).
+#
+# UPDATE 2026-09-12: checked whether CISA publishes a quantified, per-goal
+# risk-reduction percentage table that could replace the `reduces_risk_by`
+# guesses below -- it does not. CISA's own published materials on CPG
+# impact (cisa.gov, "Cybersecurity Performance Goals: Assessing How CPGs
+# Help Organizations Reduce Cyber Risk") report only aggregate before/after
+# trends across all enrolled organizations (e.g. ~20% average drop in
+# known-exploited-vulnerability exposure since CPG's 2022 release) -- not a
+# risk-reduction figure attributable to any single goal like asset
+# inventory or MFA. A set of specific per-goal percentage ranges (e.g.
+# "20-30% for asset inventory", "25-40% for MFA on OT remote access") was
+# considered for this file but rejected: those numbers do not appear in any
+# CISA publication found, and read as another tool's illustrative estimate
+# rather than a sourced figure -- exactly the kind of unverified number this
+# project's verification gate exists to keep out. The `reduces_risk_by`
+# fractions below therefore remain what they always were: the author's own
+# conservative estimate, informed by which CPG 2.0 goal each control maps
+# to, not an official CISA quantification. If the author's own read of the
+# primary CPG 2.0 PDF turns up a real quantified figure this search missed,
+# update the values below and cite the PDF section directly.
 #
 # Each control applies to one or more product classes (from
 # product_class_taxonomy.yaml) and reduces the row's effective risk score by
 # the stated fraction. A row can match more than one control; reductions
-# stack multiplicatively (see src/join.py: apply_compensating_control).
+# stack multiplicatively (src/join.py: apply_compensating_control).
 
 controls:
-  - id: CPG2-1
-    applies_to: ["plc", "rtu"]
+  - id: "1.A"
+    title: "Asset inventory"
+    applies_to: ["ong_product_line", "plc", "rtu", "scada", "electric_adjacent"]
+    reduces_risk_by: 0.05
+    rationale: >
+      An operator that maintains a current OT asset inventory (make, model,
+      firmware version) can act on this row immediately rather than first
+      discovering whether the affected device is even in its environment.
+
+  - id: "2.W"
+    title: "No exploitable services on the internet"
+    applies_to: ["ong_product_line", "rtu", "scada"]
     reduces_risk_by: 0.2
-  - id: CPG2-4
-    applies_to: ["scada"]
+    rationale: >
+      RTU/SCADA/flow-computer product families are the classes most commonly
+      found internet-exposed in ICS-focused internet scans; removing that
+      exposure is the single highest-leverage compensating control CPG 2.0
+      names for this class of device. (2.X "Limit OT Connections to Public
+      Internet" is closely related and a candidate to add as its own line —
+      not added here to avoid double-counting the same underlying control.)
+
+  - id: "1.C"
+    title: "OT cybersecurity leadership"
+    applies_to: ["ong_product_line", "electric_adjacent"]
+    reduces_risk_by: 0.05
+    rationale: >
+      Applies broadly wherever OT-specific governance exists as a
+      compensating factor around an otherwise-unpatched device; a small,
+      non-technical reduction distinct from the technical controls below.
+
+  - id: "2.F"
+    title: "Network segmentation"
+    applies_to: ["ong_product_line", "plc", "rtu", "scada"]
+    reduces_risk_by: 0.2
+    rationale: >
+      Segmenting control-system networks from the corporate IT network and
+      the internet is CPG 2.0's core OT recommendation and the single
+      largest documented risk-reduction lever for PLC/RTU/SCADA-class
+      devices specifically.
+
+  - id: "1.I"
+    title: "Vendor/supplier cybersecurity requirements"
+    applies_to: ["electric_adjacent"]
     reduces_risk_by: 0.1
+    rationale: >
+      Interconnection-point protection/SCADA equipment is often
+      utility-owned or utility-specified; vendor/supplier cybersecurity
+      requirements in the interconnection agreement are the compensating
+      control most directly available to the ONG-side operator.
+
+  - id: "1.E"
+    title: "Mitigating known vulnerabilities (CISA KEV)"
+    applies_to: ["ong_product_line", "plc", "rtu", "scada", "electric_adjacent"]
+    reduces_risk_by: 0.0
+    rationale: >
+      Recorded for crosswalk completeness (every row's `known_exploited`
+      column already reflects CISA KEV membership directly); this control
+      does not additionally reduce the computed risk score to avoid
+      double-counting a signal the dataset already carries as its own field.

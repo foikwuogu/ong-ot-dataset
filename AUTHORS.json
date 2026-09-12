@@ -1,0 +1,38 @@
+{
+  "_comment": "Author block for this project. Every document, citation file, Zenodo record, manuscript author list, and commit reads from here, so names appear identically everywhere. Order is author order. Roles use CRediT terms.",
+  "authors": [
+    {
+      "name": "Friday Ogochukwu Ikwuogu",
+      "family": "Ikwuogu",
+      "given": "Friday Ogochukwu",
+      "orcid": "0009-0009-2222-1318",
+      "email": "Friday.ikwuogu@gmail.com",
+      "affiliation": "Independent Researcher, Odessa, Texas, USA",
+      "roles": ["Conceptualization", "Methodology", "Software", "Data curation", "Validation", "Writing - original draft", "Writing - review and editing"],
+      "corresponding": true
+    }
+  ],
+  "collaborators": [
+    {
+      "name": "Engr. Silas Abutu",
+      "family": "Abutu",
+      "given": "Silas",
+      "honorific": "Engr.",
+      "orcid": "",
+      "email": "abutu_s@pti.edu.ng",
+      "affiliation": "Electrical and Electronic Engineering Department, Petroleum Training Institute, Effurun, Delta State, Nigeria",
+      "roles": ["Validation", "Writing - review and editing"],
+      "corresponding": false
+    },
+    {
+      "name": "Abidemi Orimogunje",
+      "family": "Orimogunje",
+      "given": "Abidemi",
+      "orcid": "",
+      "email": "orimogunjea@run.edu.ng",
+      "affiliation": "Electrical and Electronic Engineering Department, Redeemer's University, Ede, Osun State, Nigeria",
+      "roles": ["Validation", "Writing - review and editing"],
+      "corresponding": false
+    }
+  ]
+}

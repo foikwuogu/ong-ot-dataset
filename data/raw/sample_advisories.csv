@@ -1,5 +1,8 @@
-cve_id,Vendor,Product,Advisory,CI_Sector,Mitigation,Remediation,cwe_id
-CVE-2024-21762,Fortinet,FortiOS SSL VPN,ICSA-24-INTL-01,Energy,"No update is available for this build; upgrade to a patched version when released.","Upgrade to FortiOS 7.4.3 or later.",CWE-787
-CVE-2023-6448,Unitronics,Vision Series PLC,ICSA-23-325-01,Water and Wastewater,"Change default password immediately.","Vendor has not responded with a firmware fix as of this advisory.",CWE-1188
-CVE-2022-1161,Schneider Electric,Modicon Controllers,ICSA-22-179-01,Energy,"Apply the vendor-provided firmware update.","Firmware update available; apply per vendor bulletin.",CWE-707
-CVE-2021-38452,Rockwell Automation,FactoryTalk Historian,ICSA-21-329-01,Energy,"No patch currently available; restrict network access to the affected service.","End of life for this product version; vendor recommends migration.",CWE-306
+cve_id,ICS-CERT_Number,ICS-CERT_Advisory_Title,Vendor,Product,Products_Affected,Critical_Infrastructure_Sector,Cumulative_CVSS,CVSS_Severity
+CVE-2024-21762,ICSA-24-INTL-01,Fortinet FortiOS SSL VPN Out-of-Bounds Write,Fortinet,FortiOS SSL VPN,FortiOS before 7.6.0,Multiple Critical Sectors,9.6,Critical
+CVE-2023-6448,ICSA-23-325-01,Unitronics Vision Series PLC Hard-Coded Credentials,Unitronics,Vision Series PLC,VisiLogic before 9.9.00,Water and Wastewater,7.5,High
+CVE-2022-1161,ICSA-22-179-01,Schneider Electric Modicon Controllers Improper Access Control,Schneider Electric,Modicon M340 Controllers,M340 all firmware before v4.2,Critical Manufacturing,7.5,High
+CVE-2021-38452,ICSA-21-329-01,Rockwell Automation FactoryTalk Historian Improper Authentication,Rockwell Automation,FactoryTalk Historian,All versions,Energy,6.5,Medium
+CVE-2025-30001,ICSA-25-140-06,Schneider Electric Triconex Tricon Safety Instrumented System Deserialization,Schneider Electric,"Triconex Tricon Safety Instrumented System, paired with ControlWave RTU on gas pipeline compressor stations",Tricon firmware before 11.6,Oil and Gas,9.1,Critical
+CVE-2025-40002,ICSA-25-160-03,Schweitzer Engineering Laboratories SEL-451 Protection Relay Authentication Bypass,Schweitzer Engineering Laboratories,SEL-451 Protection Relay (compressor station substation interconnection point),SEL-451 firmware before R412,Energy,8.1,High
+CVE-2025-50003,ICSA-25-180-02,ABB RTU560 Pipeline Flow Computer Buffer Overflow,ABB,RTU560 pipeline flow computer,RTU560 used for custody transfer metering,Oil and Gas,7.8,High
