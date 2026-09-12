@@ -245,6 +245,50 @@ _STOPWORDS = {
     "whatever", "whenever", "wherever", "whichever", "whoever",
 }
 
+# Known pairs of tokens that pass _GENERIC_TOKENS/_STOPWORDS individually but
+# are really two halves of ONE common phrase, not two independent pieces of
+# evidence -- the 2+-token requirement in apply_attack_ics_match can't tell
+# the difference between "two unrelated distinctive words happened to both
+# appear" (real corroborating evidence) and "one ordinary two-word phrase
+# got tokenized into two pieces" (no evidence at all) on its own.
+#
+# Found 2026-09-12 via a full manual review of a real --full run's 142
+# ATT&CK-matched rows (post the 2+-token fix): 42 of the 142 rows were false
+# positives, and every single one matched on exactly one of these pairs and
+# nothing else --
+#   CyberAv3ngers (22 rows, "programmable + logic" = "Programmable Logic
+#     Controller", matched against Schneider Modicon M221 / IDEC PLCs /
+#     AutomationDirect CLICK -- none of them Unitronics, the vendor
+#     CyberAv3ngers actually targeted)
+#   FIN7 (6 rows, "services + service", singular/plural of the same word,
+#     matched against unrelated Rockwell VMware appliances)
+#   OilRig (6 rows, "palo + alto" = "Palo Alto [Networks]", one proper noun
+#     split in two, matched against a Siemens RUGGEDCOM product that simply
+#     bundles a Palo Alto Networks firewall)
+#   Triton (6 rows, "built + framework", matched against ".NET Framework"
+#     OPC UA products -- unrelated to the genuine Triconex/Tricon matches
+#     this same entity gets elsewhere)
+#   BlackEnergy (2 rows, "denial + service" = "Denial of Service", matched
+#     against a Rockwell advisory whose own title contains that phrase)
+# Meanwhile the 100 genuine rows (INCONTROLLER: schneider+codesys,
+# schneider+plcs, plcs+codesys; EKANS: platforms+proficy) never hit any of
+# these pairs and are unaffected.
+#
+# A row is only rejected when its matched tokens for that entity are EXACTLY
+# one of these pairs and nothing else -- if a third, independent token also
+# matches, that's corroborating evidence beyond the generic phrase and the
+# match is allowed to stand. This is a curated list, not a general phrase
+# detector (see NEXT_STEPS.md item 7's TF-IDF option for that); expect to
+# extend it the same reactive way _GENERIC_TOKENS was built.
+_NON_INDEPENDENT_PAIRS = {
+    frozenset({"programmable", "logic"}),
+    frozenset({"denial", "service"}),
+    frozenset({"denial", "services"}),
+    frozenset({"built", "framework"}),
+    frozenset({"palo", "alto"}),
+    frozenset({"service", "services"}),
+}
+
 
 def _distinctive_tokens(text: str) -> list[str]:
     tokens = re.findall(r"[a-z0-9\-]{4,}", str(text or "").lower())
@@ -351,7 +395,11 @@ def apply_attack_ics_match(product: str, entity_index: list[tuple[str, str, str,
             t for t in unique_tokens
             if re.search(r"\b" + re.escape(t) + r"\b", description)
         ]
-        if len(matched) >= 2:
+        # Reject if the matched tokens are EXACTLY one known non-independent
+        # phrase pair (see _NON_INDEPENDENT_PAIRS above) and nothing more --
+        # a third, independently-matching token would mean real evidence
+        # beyond the generic phrase, so that case is still allowed through.
+        if len(matched) >= 2 and frozenset(matched) not in _NON_INDEPENDENT_PAIRS:
             return name, entity_type, technique_ids, " + ".join(matched)
     return "", "", "", ""
 
