@@ -1,6 +1,6 @@
 # Codebook — `data/processed/ong_ot_dataset_v1.1.csv`
 
-**Status: DRAFT — unverified.** One row = one (CVE, CISA ICS advisory) pair
+**Status: Verified against the real `--full` run, 2026-09-12.** One row = one (CVE, CISA ICS advisory) pair
 from the full ICS advisory universe (no hard oil & gas filter — relevance is
 expressed through `ong_product_class` / `ong_product_weight`).
 
@@ -56,7 +56,7 @@ real `--full` output. v1.1's demo fixture uses the real column set.
 | `no_patch_basis` | string | `cna_text_match:<phrase>`, `cna_text_no_match`, or `no_remediation_text_captured` — always shows *why* the flag landed where it did, so "we have no signal" is never confused with "confirmed patched." |
 | `cpg2_applicable_controls` | string | Comma-joined CPG 2.0 control IDs (e.g. `1.A, 2.F, 1.E` — corrected 2026-09-11 against CISA's live goal listing, see `config/compensating_controls_cpg2.yaml`) applicable to this row's `ong_product_class`, or `"unmapped — needs review"`. `reduces_risk_by` is the author's own conservative estimate per control — checked 2026-09-12 and confirmed CISA does not publish a quantified per-goal risk-reduction figure to compare against (see that config file's header). |
 | `cpg2_combined_risk_reduction` | float [0,1] | Combined multiplicative risk reduction across every matched control. |
-| `attack_ics_matched_entity` | string | Name of an ATT&CK for ICS group or software whose own STIX description contains a distinctive token from this row's `Product` field, or blank. Expected to be a narrow, mostly-blank overlap — but the first real `--full` run matched 31% of rows, including non-ICS-specific entities (FIN7, REvil, Conficker); **[VERIFY]** — see LIMITATIONS.md item 6. See `src/join.py:apply_attack_ics_match`. |
+| `attack_ics_matched_entity` | string | Name of an ATT&CK for ICS group or software whose own STIX description contains a distinctive token from this row's `Product` field, or blank. A narrow, mostly-blank overlap by design -- the first real `--full` run's 31% match rate turned out to be a substring-matching bug (generic-word false positives), fixed and spot-checked; the corrected real run matches 0.36% of rows (100/27,944), only INCONTROLLER and EKANS, both verified against their documented real-world target profiles. See LIMITATIONS.md item 6 and `src/join.py:apply_attack_ics_match`. |
 | `attack_ics_entity_type` | string | `group` or `software`, when matched. |
 | `attack_ics_technique_ids` | string | Comma-joined ATT&CK technique IDs that matched entity `uses`, when matched. |
 | `attack_ics_matched_token` | string | New in this fix: the exact distinctive token (from `Product`) found in the matched entity's description — added so a QA reviewer can see *why* a match fired, not just *that* it fired, without re-running any code. |

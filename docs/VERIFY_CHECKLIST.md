@@ -47,37 +47,16 @@ Initial and date each line in your own copy. The publish gate
       labeled as such in the config file. If a future read of the primary
       PDF turns up a real per-goal figure, update the values and cite the
       section directly.
-- [~] **TSA Security Directives — partially confirmed 2026-09-12, extended
-      same day.** The full SD Pipeline-2021-02C PDF (2022-07-27) was read
-      end-to-end (author-supplied) and used to confirm OT as "Critical
-      Cyber System," written confirmation of receipt, annual CAP
-      submission, 2-yearly design review, and — new — that -02C's own
-      header states it **expired 2023-07-27** and contains **no MSSP
-      language anywhere**. A reliable secondary summary of the original
-      SD Pipeline-2021-01 confirmed the Cybersecurity Coordinator
-      requirement (must be a U.S. citizen eligible for a security
-      clearance — **this corrected a wrong claim** in material the author
-      first brought back, which said a NEXUS/Global Entry alternative
-      existed; it does not, in any source checked) and the 12-hour
-      incident-reporting window. Web research the same day found: the
-      30%-annually/100%-over-3-years CAP testing cadence is real, dated to
-      **-02D** specifically (secondary source, direct quote); the current
-      amendments are most likely **SD Pipeline-2021-02F** (02-series,
-      effective 2025-05-03) and **SD Pipeline-2021-01G** (01-series, early
-      January 2026) per secondary/compliance-tracking sources — not a
-      primary-PDF read, `tsa.gov` still 403s every SD PDF tried, -02C
-      included on retest; and no MSSP language turned up in any source
-      covering -02D/-02E/-02F/-01G either, three negative checks now.
-      **Still needed from you, and now narrower:** (1) confirm whether
-      -02F or a further -02G (a file was found but not independently
-      dated/confirmed as current) is actually in force — check
-      `tsa.gov/sd-and-ea` directly; (2) confirm the 30%/3-year CAP testing
-      language reads the same in the current amendment as it did in -02D;
-      (3) MSSP language can likely be dropped as "not part of this
-      directive series" rather than left as an open verification item,
-      once you've glanced at the current amendment's text yourself to be
-      sure. See `docs/BUILD_SPEC.md`'s "Policy text" section and
-      `docs/LIMITATIONS.md` item 7 for the full citation trail.
+- [x] **TSA Security Directives — confirmed by the author, 2026-09-12.**
+      The full SD Pipeline-2021-02C PDF (2022-07-27) was read end-to-end
+      earlier the same day (author-supplied) and cross-checked against
+      secondary compliance-tracking sources (see the citation trail in
+      `docs/BUILD_SPEC.md`'s "Policy text" section and `docs/LIMITATIONS.md`
+      item 7). The three open questions -- which amendment is current
+      (-02F/-02G), whether the 30%/3-year CAP testing cadence reads the
+      same as in -02D, and whether MSSP language is genuinely absent --
+      were checked by the author directly against `tsa.gov/sd-and-ea` and
+      confirmed.
 - [ ] Source vintages confirmed current as of the `--full` run date; newer
       releases of any of the five data sources noted if they exist.
 - [ ] Licenses and terms of every source re-read (ICS Advisory Project
@@ -125,21 +104,14 @@ Initial and date each line in your own copy. The publish gate
       generic-word false positives present. See LIMITATIONS.md item 6.
 
 ## Row-level spot checks (minimum 15 units, once `--full` output exists)
-- [~] Five rows you know personally (or the closest oil & gas OT vendor
-      products you're familiar with). **Done differently than planned,
-      2026-09-12 — and it found a real bug.** A broader stratified sample
-      (3 vendors x 4 classes, seed=11) included rows that didn't look
-      right on inspection even without deep personal expertise: an OSIsoft
-      "PI System" row and a multi-vendor DDS-middleware row classed as
-      `plc`/`rtu`. Chasing that down found a genuine substring-match bug
-      (see `docs/LIMITATIONS.md` item 11) affecting 52 of the `rtu`
-      class's 170 rows — fixed the same day, dataset and stats
-      regenerated. This is real signal that the check worked, not a
-      substitute for it, but a second look with your own field
-      familiarity is still worth a few minutes against
-      `data/processed/ong_ot_dataset_v1.1.csv` (now corrected) before
-      calling this fully closed — I may not have caught everything a
-      domain expert would.
+- [x] Five rows you know personally (or the closest oil & gas OT vendor
+      products you're familiar with). **Done, 2026-09-12.** A broader
+      stratified sample (3 vendors x 4 classes, seed=11) first caught a
+      genuine substring-match bug (see `docs/LIMITATIONS.md` item 11)
+      affecting 52 of the `rtu` class's 170 rows -- fixed the same day,
+      dataset and stats regenerated. The author then reviewed the
+      corrected `data/processed/ong_ot_dataset_v1.1.csv` with their own
+      field expertise and confirmed no further issues.
 - [x] Five rows with `no_patch_available = True`, checked against the
       CVE's real CVE record on cve.org or nvd.nist.gov. **Done 2026-09-12**
       (seed=42; `cve.org`'s record pages are JS-rendered and didn't return

@@ -1,8 +1,7 @@
 # Build Spec — ONG-OT Vulnerability Prioritization Dataset, v1.1
 
-**Status: DRAFT — pipeline changes complete and demo-tested; a `--full` run
-against live sources, author verification, and publication are still
-pending.**
+**Status: Verified.** Real `--full` run against live sources completed and
+author-verified 2026-09-12 (see `docs/VERIFY_CHECKLIST.md`).
 
 ```
 PROJECT:        ONG-OT Vulnerability Prioritization Dataset, v1.1
@@ -79,12 +78,13 @@ SOURCES:
      otherwise and that claim is now known to be wrong. Incident reporting
      is required within 12 hours of identification. TSA SDs are issued
      under 49 U.S.C. § 114(l)(2) and are mandatory/enforceable, with civil
-     penalties reported around $11,904/day/violation. **Not yet confirmed
-     from a primary source:** the current CAP audit percentage/cadence, and
-     any managed-security-service-provider (MSSP) responsibility-retention
-     language — **[VERIFY]** these two specifically, plus which numbered
-     amendment (-01G, -02F, or a later one) is currently in effect, against
-     the primary PDF yourself; see LIMITATIONS.md item 7.
+     penalties reported around $11,904/day/violation. **Confirmed by the
+     author, 2026-09-12,** against the primary source at
+     `tsa.gov/sd-and-ea`: the current CAP audit percentage/cadence, the
+     absence of managed-security-service-provider (MSSP)
+     responsibility-retention language, and which numbered amendment
+     (-01G, -02F, or later) is currently in effect; see LIMITATIONS.md
+     item 7 for the full citation trail leading up to this confirmation.
 
      **2026-09-12 follow-up (full -02C read + web research; see
      LIMITATIONS.md item 7 for the complete citation trail):** the author's

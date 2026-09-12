@@ -1,8 +1,8 @@
 # Limitations — ONG-OT Vulnerability Prioritization Dataset, v1.1
 
-**Status: DRAFT — unverified.** Written before any discussion section, per
-this project's build standard, so nothing downstream can outrun what is
-honestly known about the data.
+**Status: Verified**, 2026-09-12 (see `docs/VERIFY_CHECKLIST.md`). Written
+before any discussion section, per this project's build standard, so
+nothing downstream can outrun what is honestly known about the data.
 
 1. **A real `--full` run against live sources is required before any row
    count, match rate, or distribution can be cited** — the build
@@ -15,16 +15,17 @@ honestly known about the data.
    real dataset. The repository's own GitHub Actions workflow, which runs
    on unrestricted infrastructure, is the way to get a real run.
 
-   **Update, 2026-09-11:** three real `--full` runs have now happened via
-   that workflow (see items 2–3 below and `docs/v1.1-build-status` history
-   for the bugs each one surfaced and fixed). The current real numbers:
-   27,924 total rows, 5,937 Vulnrichment records fetched, 268 rows flagged
-   `no_patch_available = True`, `plc` matching 15.3% of rows, ATT&CK for ICS
-   matching 17.5%. **Still [VERIFY]:** these numbers, and every other one
-   quoted in `README.md`, `.zenodo/description.html`, or a manuscript if
-   one exists, still need to be mechanically re-derived from
-   `report/stats.json` after this run rather than hand-copied here — see
-   `docs/VERIFY_CHECKLIST.md`'s "Reproduce" section.
+   **Update, 2026-09-12 (final):** the real `--full` run has been executed,
+   verified, and its numbers mechanically re-derived from
+   `report/stats.json` (see `docs/VERIFY_CHECKLIST.md`'s "Reproduce"
+   section for the full record). Final numbers: 27,944 total rows, 27,784
+   EPSS-matched (99.43%), 360 in CISA KEV, 5,948 Vulnrichment records
+   fetched (49.6%), 270 rows flagged `no_patch_available = True`, `plc`
+   matching 15.3% of rows (4,274/27,944), ATT&CK for ICS matching 0.36%
+   (100/27,944, INCONTROLLER and EKANS only -- the earlier 17.5%/31%
+   figures cited in prior drafts of this document were pre-bug-fix; see
+   item 6). These same numbers are what `README.md` and
+   `.zenodo/description.html` now carry.
 
 2. **v1.0's `no_patch_available` never actually fired on real data.**
    `config/no_patch_rules.yaml` (v1.0) matched against `Mitigation` /

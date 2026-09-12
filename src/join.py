@@ -55,10 +55,11 @@ brand) inside "multilink" (a different, unrelated GE switch product) found
 during the same review, though that second one turned out to be inert in
 practice ("multilin"-only rows never reached `electric_adjacent` anyway,
 since that class also requires a context-keyword hit) — fixed anyway since
-it's the same bug shape and the fix is free. **[VERIFY]** if a future
-`--full` run's taxonomy changes add new short candidate strings, check them
-against real data the same way (see the row-level spot-check methodology
-in docs/VERIFY_CHECKLIST.md) before trusting a low "unmapped" count.
+it's the same bug shape and the fix is free. Maintainer note for future
+runs: if a future `--full` run's taxonomy changes add new short candidate
+strings, check them against real data the same way (see the row-level
+spot-check methodology in docs/VERIFY_CHECKLIST.md) before trusting a low
+"unmapped" count.
 """
 from __future__ import annotations
 import re

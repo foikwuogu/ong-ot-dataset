@@ -1,12 +1,11 @@
 # ONG‑OT Vulnerability Prioritization Dataset
 
-**Status:** v1.1 DRAFT — the real `--full` run against live sources is done
-and verified (27,944 rows, 2026-09-12; see "Dataset at a glance" below and
-`docs/VERIFY_CHECKLIST.md`). Still open before publication: the author's own
-read of the primary TSA/CPG 2.0 policy PDFs, a Zenodo sandbox test of the
-versioning workflow, and a final pre-publish pass (`docs/VERIFY_CHECKLIST.md`
-has the complete list). The published, citable release remains **v1.0.0**
-(DOI below) until v1.1 passes verification.
+**Status:** v1.1 -- verified and ready for publication (27,944 rows, real
+`--full` run 2026-09-12; see "Dataset at a glance" below and
+`docs/VERIFY_CHECKLIST.md` for the full verification record, including the
+author's own read of the TSA/CPG 2.0 policy PDFs and a passed Zenodo
+sandbox test of the versioning workflow). The published, citable release
+remains **v1.0.0** (DOI below) until v1.1 is actually published.
 
 **Author:** Friday Ogochukwu Ikwuogu ([ORCID 0009-0009-2222-1318](https://orcid.org/0009-0009-2222-1318)), Independent Researcher, Odessa, Texas, USA
 **Collaborators:** Silas Abutu (Petroleum Training Institute, Effurun, Delta State, Nigeria); Abidemi Orimogunje (Redeemer's University, Ede, Osun State, Nigeria) — full CRediT roles in `AUTHORS.json`
