@@ -216,12 +216,42 @@ _GENERIC_TOKENS = {
     "technology", "government",
 }
 
+# Standard English function words (articles, conjunctions, prepositions,
+# pronouns, auxiliary verbs), kept separate from _GENERIC_TOKENS above
+# because that list is reactive/domain-specific -- built by hand-adding
+# whatever ICS/product/corporate word caused a collision in a real run --
+# while this one is a plain stopword list that should have been here from
+# the start. Added 2026-09-12 after a real --full run (post the 2+-token
+# fix below) still matched GOLD SOUTHFIELD on "trend + that": "that" is an
+# ordinary function word no domain-specific blocklist would ever think to
+# add on its own. Only 4+ character words matter here since
+# _distinctive_tokens already drops anything shorter via the regex.
+_STOPWORDS = {
+    "that", "this", "these", "those", "than", "then", "when", "where",
+    "which", "while", "from", "into", "onto", "upon", "such", "same",
+    "both", "each", "either", "neither", "only", "very", "just", "also",
+    "still", "indeed", "however", "moreover", "furthermore", "thus",
+    "hence", "therefore", "although", "though", "unless", "until",
+    "since", "about", "above", "below", "again", "further", "once",
+    "here", "there", "does", "doing", "have", "having", "will", "would",
+    "could", "should", "shall", "must", "cannot", "your", "yours",
+    "their", "theirs", "them", "they", "what", "whom", "whose", "some",
+    "more", "most", "less", "many", "much", "over", "under", "between",
+    "during", "before", "against", "among", "amongst", "around",
+    "toward", "towards", "within", "without", "throughout", "along",
+    "across", "behind", "beside", "besides", "beyond", "except",
+    "inside", "outside", "near", "itself", "himself", "herself",
+    "themselves", "ourselves", "yourself", "yourselves", "myself",
+    "whatever", "whenever", "wherever", "whichever", "whoever",
+}
+
 
 def _distinctive_tokens(text: str) -> list[str]:
     tokens = re.findall(r"[a-z0-9\-]{4,}", str(text or "").lower())
     return [
         t for t in tokens
         if t not in _GENERIC_TOKENS
+        and t not in _STOPWORDS
         # A bare number (e.g. a year like "2019", or a generic quantity)
         # carries no real distinguishing power on its own -- real product
         # identifiers mix letters and digits ("sel-451", "s7-1500") or are
