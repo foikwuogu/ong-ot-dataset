@@ -1,9 +1,12 @@
 # ONG‑OT Vulnerability Prioritization Dataset
 
-**Status:** v1.1 DRAFT — pipeline changes complete and demo-tested; a real
-`--full` run against live sources, author verification, and publication are
-still pending (see `docs/VERIFY_CHECKLIST.md`). The published, citable
-release remains **v1.0.0** (DOI below) until v1.1 passes verification.
+**Status:** v1.1 DRAFT — the real `--full` run against live sources is done
+and verified (27,944 rows, 2026-09-12; see "Dataset at a glance" below and
+`docs/VERIFY_CHECKLIST.md`). Still open before publication: the author's own
+read of the primary TSA/CPG 2.0 policy PDFs, a Zenodo sandbox test of the
+versioning workflow, and a final pre-publish pass (`docs/VERIFY_CHECKLIST.md`
+has the complete list). The published, citable release remains **v1.0.0**
+(DOI below) until v1.1 passes verification.
 
 **Author:** Friday Ogochukwu Ikwuogu ([ORCID 0009-0009-2222-1318](https://orcid.org/0009-0009-2222-1318)), Independent Researcher, Odessa, Texas, USA
 **Collaborators:** Silas Abutu (Petroleum Training Institute, Effurun, Delta State, Nigeria); Abidemi Orimogunje (Redeemer's University, Ede, Osun State, Nigeria) — full CRediT roles in `AUTHORS.json`
@@ -73,6 +76,28 @@ shipped without: `AUTHORS.json`, `CITATION.cff`, `LICENSE`, a `docs/` set
 `data/processed/qa_report.txt` and `report/stats.json`, and provenance
 logging for every raw fetch (`data/raw/PROVENANCE.txt`).
 
+## Dataset at a glance (v1.1, real `--full` run, 2026-09-12)
+
+Every number below is copied from `report/stats.json`, generated once by
+`src/qa.py` from the dataset itself — nothing here is hand-typed. Re-derive
+after any new `--full` run rather than editing these by hand.
+
+| Metric | Value |
+|--------|-------|
+| Total rows (one CVE-advisory pair per row) | 27,944 |
+| EPSS score matched | 27,784 (99.43%) |
+| In CISA KEV catalog | 360 (1.29%) |
+| Vulnrichment CNA remediation text present | 4,170 (14.92%) |
+| `no_patch_available = True` | 270 (0.97%) |
+| ATT&CK for ICS matched (group/software) | 100 (0.36%) — INCONTROLLER (82 rows) and EKANS (18 rows) only; see `docs/LIMITATIONS.md` item 6 |
+
+Product class distribution: `unmapped` 23,246 · `plc` 4,274 · `rtu` 170 ·
+`scada` 158 · `ong_product_line` 96.
+
+For comparison, v1.0 published 27,922 rows — v1.1's 27,944 is within 0.1%,
+consistent with normal source growth since v1.0's build date rather than a
+taxonomy-driven swing.
+
 ## What is here
 
 ```
@@ -108,9 +133,14 @@ report/
 
 Requires `git`, `python3`, and outbound access to `github.com`, `cisa.gov`,
 `epss.empiricalsecurity.com`, `api.first.org`, and `raw.githubusercontent.com`
-for a real `--full` run (no API keys needed anywhere). A `GITHUB_TOKEN`
-environment variable is optional but recommended — it raises the Vulnrichment
-fetch's GitHub API rate limit from 60/hour to 5,000/hour.
+for a real `--full` run. No API keys or tokens are needed, or wanted: the
+ICS advisories and Vulnrichment fetches both read from
+`raw.githubusercontent.com`, a public CDN that isn't subject to the GitHub
+API's rate limits and actively rejects an `Authorization` header — see
+`src/fetch_vulnrichment.py`'s module docstring for the incident this caused
+in an earlier build. Only `src/fetch_ics_advisories.py`'s one directory
+listing goes through the real `api.github.com`, which is unauthenticated and
+low-volume enough that the default 60/hour limit is never an issue.
 
 ```bash
 pip install -r requirements.txt
@@ -145,9 +175,11 @@ Full provenance (file hashes, exact paths, access dates) is written to
 ## Limitations
 
 See `docs/LIMITATIONS.md` before using or citing anything here — in
-particular, no real `--full` run has been executed for v1.1 yet (item 1),
-and the CPG 2.0 goal IDs are reconstructed from secondary sources pending
-the author's own read of the primary PDF (item 7).
+particular, the CPG 2.0 `reduces_risk_by` risk-reduction values are the
+author's own conservative estimate (not CISA-published figures), and the
+current TSA Security Directive amendment in force, its exact CAP testing
+cadence, and any MSSP-responsibility language are still pending the
+author's own read of the primary PDF (item 7).
 
 ## Data sources & licensing
 

@@ -55,6 +55,28 @@
 
 <hr>
 
+<h2>Dataset at a glance (v1.1, real <code>--full</code> run, 2026-09-12)</h2>
+
+<p>Every figure below is copied from <code>report/stats.json</code>, generated once by the pipeline's own QA module from the dataset itself.</p>
+
+<table>
+  <thead>
+    <tr><th>Metric</th><th>Value</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Total rows (one CVE&ndash;advisory pair per row)</td><td>27,944</td></tr>
+    <tr><td>EPSS score matched</td><td>27,784 (99.43%)</td></tr>
+    <tr><td>In CISA KEV catalog</td><td>360 (1.29%)</td></tr>
+    <tr><td>Vulnrichment CNA remediation text present</td><td>4,170 (14.92%)</td></tr>
+    <tr><td><code>no_patch_available = True</code></td><td>270 (0.97%)</td></tr>
+    <tr><td>ATT&amp;CK for ICS matched (group/software)</td><td>100 (0.36%) &mdash; INCONTROLLER and EKANS only</td></tr>
+  </tbody>
+</table>
+
+<p>Product class distribution: <code>unmapped</code> 23,246 &middot; <code>plc</code> 4,274 &middot; <code>rtu</code> 170 &middot; <code>scada</code> 158 &middot; <code>ong_product_line</code> 96. For comparison, v1.0 published 27,922 rows.</p>
+
+<hr>
+
 <h2>Features</h2>
 
 <ul>
