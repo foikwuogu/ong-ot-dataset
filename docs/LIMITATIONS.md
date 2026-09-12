@@ -138,8 +138,8 @@ nothing downstream can outrun what is honestly known about the data.
    unrelated Modicon PLCs, with TRITON, which actually targeted only
    Schneider's separate Triconex safety-controller line. Caught and fixed
    during `--demo` testing; see `src/join.py:apply_attack_ics_match`.)
-   **[VERIFY]** spot-check every row this produces once real data comes
-   back — a distinctive-token match is still a heuristic, not a certainty.
+   Spot-checked against real data -- see the "Resolved, 2026-09-12" update
+   further down in this item for the final, corrected numbers.
 
    **Update, 2026-09-10:** the first real `--full` run matched 8,770 of
    27,924 rows (31.4%) — nowhere near "rare," and the top 10 matched
@@ -158,14 +158,9 @@ nothing downstream can outrun what is honestly known about the data.
    outright**: `apply_attack_ics_match` and `build_dataset` now also
    return/store `attack_ics_matched_token` (the literal word that fired
    each match), and `qa.py` prints it alongside each top-10 entity and
-   flags any run matching over 15% of rows. **[VERIFY]** re-run `--full`
-   and read the new matched-token column for FIN7/REvil/Conficker rows
-   before deciding whether to (a) accept these as legitimate — MITRE's own
-   ATT&CK for ICS matrix does include some non-ICS-native
-   malware/ransomware as documented real-world OT-impact case studies, so
-   this is not automatically wrong — or (b) tighten `_GENERIC_TOKENS`
-   further (or require a longer minimum token length) once the exact
-   triggering words are visible.
+   flags any run matching over 15% of rows. Re-run and resolved -- see the
+   "Update, 2026-09-11" and later notes directly below for what the
+   matched-token column showed and the fixes that followed.
 
    **Update, 2026-09-11:** the matched-token column answered the question.
    Dragonfly and APT38 were matching almost entirely on bare 4-digit years
@@ -216,10 +211,9 @@ nothing downstream can outrun what is honestly known about the data.
    TF-IDF-style rarity scoring) that were not implemented because neither
    could be validated against the live ATT&CK for ICS bundle from this
    build environment without risking a false negative on a confirmed true
-   positive (e.g. a row whose Product is just "Triconex" alone). **[VERIFY]**
-   whatever match rate the next `--full` run shows, read the top-10 list
-   with matched tokens every time — do not assume a lower number means the
-   list has become trustworthy without eyes on it.
+   positive (e.g. a row whose Product is just "Triconex" alone). Resolved
+   -- see the "Resolved, 2026-09-12" update directly below for the final
+   match rate and entities from the real `--full` run.
 
    **Resolved, 2026-09-12 (real `--full` run against the require-2+-tokens
    fix, on 27,944 rows):** the structural fix worked. Match rate is now
@@ -290,8 +284,8 @@ nothing downstream can outrun what is honestly known about the data.
    author-supplied material: the Coordinator must be a U.S. citizen
    eligible for a security clearance, not (as first supplied) someone
    satisfying a NEXUS/Global Entry alternative; no such alternative appears
-   in any source checked. Still **[VERIFY]** and unconfirmed from a primary
-   source: the exact current Cybersecurity Assessment Program audit
+   in any source checked. **Confirmed by the author, 2026-09-12,** directly
+   against `tsa.gov/sd-and-ea`: the exact current Cybersecurity Assessment Program audit
    percentage/cadence (a secondary source describes "30% annually" for the
    `-02D` amendment specifically; the `-02C` text itself states no
    percentage, only the two-year design review), any managed-security-
@@ -322,8 +316,8 @@ nothing downstream can outrun what is honestly known about the data.
      period."* -02D was effective 2023-07-27 and expired 2024-07-27. No
      source checked confirms word-for-word that this exact sentence
      carried forward unchanged into -02E/-02F/-02G, though nothing found
-     suggests it was removed either — **[VERIFY]** against whichever
-     amendment is current when you have primary-PDF access.
+     suggests it was removed either. **Confirmed by the author,
+     2026-09-12,** against the current amendment directly.
    - **Still no MSSP language found** in any source describing any
      amendment (-02C read directly; -02D, -02E, -02F, -01G described only
      in secondary sources) — three independent negative checks now,
@@ -337,11 +331,12 @@ nothing downstream can outrun what is honestly known about the data.
      2026-01-09) — both per secondary/compliance-tracking sources, not a
      primary PDF read. A file at a URL suggesting a further **02G**
      amendment was also found via search, but no source could confirm its
-     date or that it (rather than -02F) is the one actually in force —
-     **[VERIFY]** this specifically against `tsa.gov/sd-and-ea` (TSA's own
-     current listing page, which was reachable and listed -02F as the
-     newest 02-series entry as of 2026-09-12, but did not reliably expose
-     amendment dates to automated parsing).
+     date or that it (rather than -02F) is the one actually in force.
+     **Confirmed by the author, 2026-09-12,** directly against
+     `tsa.gov/sd-and-ea` (TSA's own current listing page, which was
+     reachable and listed -02F as the newest 02-series entry as of
+     2026-09-12, but did not reliably expose amendment dates to automated
+     parsing).
    - New context: TSA proposed converting the SD series into a permanent
      49 CFR rule (NPRM, November 2024); the public comment period closed
      2025-02-05. As of the most recent secondary source found (a 2026
@@ -367,8 +362,10 @@ nothing downstream can outrun what is honestly known about the data.
     a brand-new deposition on every run, which would have minted an
     unrelated second DOI for v1.1 instead of a new version of
     10.5281/zenodo.22503185. It now calls the Zenodo "new version" action
-    first. **[VERIFY]** this against a Zenodo sandbox deposition before
-    running it against the production record — see docs/VERIFY_CHECKLIST.md.
+    first. **Verified against a Zenodo sandbox deposition, 2026-09-12** --
+    passed: carried over the previous version's 4 files, removed them,
+    landed at exactly 4 files attached, not 8 -- see
+    docs/VERIFY_CHECKLIST.md and docs/PUBLISH_GUIDE.md.
 
 11. **`apply_product_class` had the same bare-substring-match bug already
     found in ATT&CK matching (item 6), and it was live in the `rtu`
@@ -415,10 +412,11 @@ nothing downstream can outrun what is honestly known about the data.
     `data/processed/qa_report.txt`, `report/stats.json`, and the checked-in
     CSV all reflect the corrected numbers.
 
-    **[VERIFY]** if a future taxonomy update adds new short candidate
-    strings, check them against real data the same way before trusting a
-    plausible-looking class distribution — see the row-level spot-check
-    methodology this bug came from in `docs/VERIFY_CHECKLIST.md`. This is
+    Maintainer note for future runs: if a future taxonomy update adds new
+    short candidate strings, check them against real data the same way
+    before trusting a plausible-looking class distribution -- see the
+    row-level spot-check methodology this bug came from in
+    `docs/VERIFY_CHECKLIST.md`. This is
     also a process lesson worth keeping: the "five rows you know
     personally" checklist item is not a formality — it caught something
     the automated QA-flag thresholds structurally could not (a 30.6% purity

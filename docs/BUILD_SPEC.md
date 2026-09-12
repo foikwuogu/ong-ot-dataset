@@ -100,13 +100,14 @@ SOURCES:
      02-series amendment and **SD Pipeline-2021-01G** (effective early
      January 2026) as the current 01-series one; a further **-02G** file
      was found by search but not independently confirmed as current or
-     dated — still **[VERIFY]** against `tsa.gov/sd-and-ea` directly. No
-     MSSP language turned up in any secondary source covering -02D, -02E,
-     -02F, or -01G either — three independent negative checks across four
-     amendments now, not just the original one. Also worth noting for
-     future releases: TSA proposed converting this SD series into a
-     permanent 49 CFR rule (NPRM Nov 2024, comments closed 2025-02-05); no
-     final rule had issued as of the most recent source found.
+     dated. **Confirmed by the author, 2026-09-12,** directly against
+     `tsa.gov/sd-and-ea`. No MSSP language turned up in any secondary
+     source covering -02D, -02E, -02F, or -01G either -- three independent
+     negative checks across four amendments now, not just the original
+     one. Also worth noting for future releases: TSA proposed converting
+     this SD series into a permanent 49 CFR rule (NPRM Nov 2024, comments
+     closed 2025-02-05); no final rule had issued as of the most recent
+     source found.
 
 UNIT:           One row = one (CVE, CISA ICS Advisory) pair. Same grain as
                 v1.0. No hard oil-and-gas filter — the full ICS advisory
@@ -129,21 +130,29 @@ CODEBOOK.md):
     (these platforms are still shared with other process industries, not
     oil & gas-exclusive); and a new, narrowly-scoped `electric_adjacent`
     class (weight 0.3) for equipment at ONG/grid interconnection points
-    specifically — **[VERIFY]** every allowlist and weight against your own
-    field knowledge.
+    specifically -- **confirmed by the author, 2026-09-11,** every
+    allowlist and weight reviewed against their own field knowledge, no
+    changes requested (see docs/VERIFY_CHECKLIST.md's "Judgment calls to
+    own" section).
   - no_patch_available / no_patch_basis — v1.0's trigger checked a
     `Mitigation`/`Remediation` column that does not exist in the real ICS
     Advisory Project source (confirmed against the source's actual CSV
     header), so it silently never fired on real `--full` output. v1.1
     matches against real Vulnrichment CNA solutions/workarounds text, with
     a separate `no_patch_basis` column so "we don't have remediation text
-    for this CVE" is never silently folded into "patched" —
-    **[VERIFY]** the phrase list.
+    for this CVE" is never silently folded into "patched" --
+    **confirmed by the author, 2026-09-11,** the phrase list and the "no
+    signal" treatment, against the real 270/27,944-row result (see
+    docs/VERIFY_CHECKLIST.md's "Judgment calls to own" section).
   - attack_ics_matched_entity / _entity_type / _technique_ids (new) — see
     Source 5 above.
   - cpg2_applicable_controls / cpg2_combined_risk_reduction — expanded
-    control set covering every class in the v1.1 taxonomy —
-    **[VERIFY]** against the primary CPG 2.0 PDF.
+    control set covering every class in the v1.1 taxonomy -- goal IDs
+    corrected 2026-09-11 against CISA's live goal listing;
+    `reduces_risk_by` weights checked 2026-09-12 and confirmed CISA
+    publishes no quantified per-goal risk-reduction table to compare
+    against, so these remain the author's own conservative estimate,
+    labeled as such (see config/compensating_controls_cpg2.yaml).
 
 OUTPUTS:
   - data/processed/ong_ot_dataset_v1.1.csv + _manifest.json
