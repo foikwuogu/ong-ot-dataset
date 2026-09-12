@@ -3,7 +3,7 @@ message: "If you use this dataset, please cite it as below."
 type: dataset
 title: "ONG-OT Vulnerability Prioritization Dataset"
 version: "1.1.0"
-date-released: "2026-09-10"
+date-released: "2026-09-12"
 authors:
   - family-names: "Ikwuogu"
     given-names: "Friday Ogochukwu"
