@@ -46,7 +46,7 @@ else
   exit 1
 fi
 
-VERSION="${VERSION:-v1.1-sandbox-test}"
+export VERSION="${VERSION:-v1.1-sandbox-test}"
 EXISTING_RECORD_ID="${1:-}"
 
 for f in \
