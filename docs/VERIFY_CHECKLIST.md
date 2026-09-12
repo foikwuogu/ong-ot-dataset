@@ -166,8 +166,14 @@ Initial and date each line in your own copy. The publish gate
 ## Zenodo versioning — before touching the production record
 - [ ] Test `.github/workflows/publish-zenodo.yml`'s corrected
       new-version logic against the Zenodo **sandbox** (sandbox.zenodo.org)
-      first, not directly against record 22503185 — see
-      docs/PUBLISH_GUIDE.md once written.
+      first, not directly against record 22503185. **Runbook + standalone
+      test script written 2026-09-12** — `docs/PUBLISH_GUIDE.md` and
+      `scripts/test_zenodo_sandbox.sh` — but not run: it needs a sandbox
+      account and personal access token that only you should hold, so this
+      is a few minutes of your own time, not something done on your behalf.
+      The script makes the identical API calls in the identical order as
+      the workflow's own "Create or version Zenodo deposition" step, so a
+      clean run of it is real evidence about the workflow, not a facsimile.
 
 ## Before it goes public
 - [ ] README, LIMITATIONS, and `.zenodo/description.html` rewritten in your
