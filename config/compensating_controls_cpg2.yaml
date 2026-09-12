@@ -29,10 +29,27 @@
 # Source: cisa.gov/cross-sector-cybersecurity-performance-goals (fetched
 # 2026-09-11). This is CISA's own goal listing page, not the full CPG 2.0
 # PDF report itself (which, like the TSA Security Directive PDF, still
-# returns 403 to automated fetch) -- **[VERIFY]** the author should still
-# open the full PDF report personally to confirm the `reduces_risk_by`
-# weights and rationale text below are defensible, since the web listing
-# gives IDs and titles but not CISA's own risk-reduction guidance per goal.
+# returns 403 to automated fetch).
+#
+# UPDATE 2026-09-12: checked whether CISA publishes a quantified, per-goal
+# risk-reduction percentage table that could replace the `reduces_risk_by`
+# guesses below -- it does not. CISA's own published materials on CPG
+# impact (cisa.gov, "Cybersecurity Performance Goals: Assessing How CPGs
+# Help Organizations Reduce Cyber Risk") report only aggregate before/after
+# trends across all enrolled organizations (e.g. ~20% average drop in
+# known-exploited-vulnerability exposure since CPG's 2022 release) -- not a
+# risk-reduction figure attributable to any single goal like asset
+# inventory or MFA. A set of specific per-goal percentage ranges (e.g.
+# "20-30% for asset inventory", "25-40% for MFA on OT remote access") was
+# considered for this file but rejected: those numbers do not appear in any
+# CISA publication found, and read as another tool's illustrative estimate
+# rather than a sourced figure -- exactly the kind of unverified number this
+# project's verification gate exists to keep out. The `reduces_risk_by`
+# fractions below therefore remain what they always were: the author's own
+# conservative estimate, informed by which CPG 2.0 goal each control maps
+# to, not an official CISA quantification. If the author's own read of the
+# primary CPG 2.0 PDF turns up a real quantified figure this search missed,
+# update the values below and cite the PDF section directly.
 #
 # Each control applies to one or more product classes (from
 # product_class_taxonomy.yaml) and reduces the row's effective risk score by

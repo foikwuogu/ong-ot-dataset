@@ -40,14 +40,51 @@ SOURCES:
      STIX description (`src/join.py:apply_attack_ics_match`) — auditable,
      row-by-row, never a bulk/class-level inference.
   6. Policy text (read/cited, not row data): CISA CPG 2.0 (Dec 2025), DOE
-     CESER Strategic Plan FY2026-2030, EO 14412, TSA SD
-     Pipeline-2021-01G/-02F.
-     NOTE: the primary CPG 2.0 and TSA SD PDFs return HTTP 403 to automated
-     fetch from every build environment tried so far. The CPG goal IDs used
-     in `config/compensating_controls_cpg2.yaml` are reconstructed from
-     CISA's own CPG web pages and third-party summaries, cross-checked
-     against each other — NOT read directly from the primary PDF.
-     **[VERIFY]** re-read the primary document yourself before publication.
+     CESER Strategic Plan FY2026-2030, EO 14412, TSA SD Pipeline-2021-01G /
+     -02C and later amendments (-02D/-02E/-02F).
+
+     CPG 2.0: the goal IDs in `config/compensating_controls_cpg2.yaml` were
+     corrected 2026-09-11 against CISA's own live goal-listing page (see
+     that file's header). The primary CPG 2.0 PDF itself still 403s to
+     every automated fetch tried. Checked directly against CISA's own
+     published materials on CPG impact (cisa.gov, Sept 2026): CISA does
+     **not** publish a quantified, per-goal risk-reduction percentage table
+     — only aggregate before/after trend figures across all enrolled
+     organizations (e.g. ~20% average drop in known-exploited-vulnerability
+     exposure since CPG's 2022 release). So the `reduces_risk_by` fractions
+     in that config file are, and remain, the author's own conservative
+     estimate — not a figure CISA itself has published. See that file's
+     rationale text for each control.
+
+     TSA Security Directives: the primary PDFs mostly still 403 to
+     automated fetch, but one — SD Pipeline-2021-02C (effective 2022-07-27,
+     tsa.gov/sites/default/files/tsa_sd_pipeline-2021-02-july-21_2022.pdf)
+     — was reachable directly on 2026-09-12 and confirms: OT is explicitly
+     covered ("Critical Cyber System" is defined as any IT **or OT** system
+     whose compromise could cause operational disruption); written
+     confirmation of receipt is required by e-mail to TSA; an annual
+     Cybersecurity Assessment Plan (CAP) submission is required, with an
+     architectural design review at least once every two years (SD-02C's
+     own text does not state a "1/3 per year, 100% every 3 years" or "30%
+     per year" cadence — a secondary source describes a 30%-annually figure
+     for the later -02D amendment specifically, so the exact current
+     percentage depends on which amendment is in force and needs the
+     author's own read of whichever is current). Checked against a
+     contemporaneous secondary summary of the original SD Pipeline-2021-01
+     (May 2021, the one that created the Cybersecurity Coordinator role):
+     the Coordinator must be **a U.S. citizen eligible to obtain a security
+     clearance**, available to TSA/CISA 24/7 — there is no NEXUS/Global
+     Entry/trusted-traveler-program alternative pathway for non-citizens in
+     any source checked; an earlier draft of this document's notes claimed
+     otherwise and that claim is now known to be wrong. Incident reporting
+     is required within 12 hours of identification. TSA SDs are issued
+     under 49 U.S.C. § 114(l)(2) and are mandatory/enforceable, with civil
+     penalties reported around $11,904/day/violation. **Not yet confirmed
+     from a primary source:** the current CAP audit percentage/cadence, and
+     any managed-security-service-provider (MSSP) responsibility-retention
+     language — **[VERIFY]** these two specifically, plus which numbered
+     amendment (-01G, -02F, or a later one) is currently in effect, against
+     the primary PDF yourself; see LIMITATIONS.md item 7.
 
 UNIT:           One row = one (CVE, CISA ICS Advisory) pair. Same grain as
                 v1.0. No hard oil-and-gas filter — the full ICS advisory

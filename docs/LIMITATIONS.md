@@ -243,14 +243,43 @@ honestly known about the data.
    themselves were fabricated-sounding placeholders that happened to read
    as plausible CPG-style IDs. Corrected to the real IDs (1.A, 2.W, 1.C,
    2.F, 1.I, 1.E respectively — see the config file's own header comment
-   for the full mapping). The TSA Security Directive PDF remained fully
-   unreachable (tsa.gov 403s even the general pipeline-cybersecurity
-   overview page, not just the PDF) — **[VERIFY]** this one is still
-   unconfirmed and needs the author's own read. **[VERIFY]** also confirm
-   the `reduces_risk_by` weight for each corrected control against the
-   full CPG 2.0 PDF's own risk guidance, not just the goal titles — the web
-   listing gave IDs and titles, not CISA's stated risk-reduction rationale
-   per goal.
+   for the full mapping).
+
+   **Update, 2026-09-12 (author-supplied source material, checked before
+   use):** the author brought back a written summary of both the CPG 2.0
+   risk-reduction guidance and the TSA Security Directives for this item.
+   Checked the CPG 2.0 half against CISA's own published materials before
+   adopting it: CISA does **not** publish a quantified, per-goal
+   risk-reduction percentage table (confirmed via a direct search of
+   cisa.gov's own reporting on CPG impact, which gives only aggregate
+   before/after trends, not per-goal figures). The specific percentage
+   ranges supplied (e.g. "20-30% for asset inventory", "25-40% for MFA on
+   OT remote access") do not appear in any CISA publication found and were
+   **not** adopted; `reduces_risk_by` in `config/compensating_controls_cpg2.yaml`
+   remains the author's own conservative estimate, now labeled as such
+   explicitly in that file's header rather than implied to be CISA-sourced.
+
+   The TSA half fared better: one primary document, SD Pipeline-2021-02C
+   (effective 2022-07-27), was directly reachable and confirmed OT is
+   explicitly named a "Critical Cyber System," written confirmation of
+   receipt is required, and an annual CAP submission plus a two-yearly
+   architectural design review are required. A reliable secondary summary
+   of the original SD Pipeline-2021-01 (May 2021) confirmed the
+   Cybersecurity Coordinator requirement, incident-reporting timeline (12
+   hours), and — importantly — **corrected** a wrong claim in the
+   author-supplied material: the Coordinator must be a U.S. citizen
+   eligible for a security clearance, not (as first supplied) someone
+   satisfying a NEXUS/Global Entry alternative; no such alternative appears
+   in any source checked. Still **[VERIFY]** and unconfirmed from a primary
+   source: the exact current Cybersecurity Assessment Program audit
+   percentage/cadence (a secondary source describes "30% annually" for the
+   `-02D` amendment specifically; the `-02C` text itself states no
+   percentage, only the two-year design review), any managed-security-
+   service-provider responsibility language, and which numbered amendment
+   (`-01G`, `-02F`, or later) is the one currently in force — `tsa.gov`
+   403s most of its own PDFs to automated fetch, including every later
+   amendment tried. See `docs/BUILD_SPEC.md`'s "Policy text" section for
+   the full citation trail.
 
 8. **Single point-in-time pull, once `--full` is run.** EPSS scores, KEV
    membership, and Vulnrichment enrichment all change over time. Every value

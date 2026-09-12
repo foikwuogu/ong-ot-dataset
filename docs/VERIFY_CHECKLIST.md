@@ -27,14 +27,32 @@ Initial and date each line in your own copy. The publish gate
       still 403s. Every ID in `config/compensating_controls_cpg2.yaml` was
       wrong (assumed a 6-category scheme; the real one has 5) and is now
       fixed — see that file's header comment and LIMITATIONS.md item 7 for
-      the before/after mapping. **Still needed from you:** open the actual
-      CPG 2.0 PDF yourself and confirm the `reduces_risk_by` fractions
-      against CISA's own risk-reduction guidance per goal — the web listing
-      gave IDs and titles only, not that.
-- [ ] Re-read the TSA Security Directive Pipeline-2021-01G PDF directly —
-      this one is still fully unreachable by any automated means tried
-      (tsa.gov 403s even its general overview pages) — and correct any
-      claim in `docs/BUILD_SPEC.md` or the README that references it.
+      the before/after mapping.
+- [x] **CPG 2.0 `reduces_risk_by` weights — checked 2026-09-12.** Confirmed
+      (by checking CISA's own published materials on CPG impact) that CISA
+      does not publish a quantified per-goal risk-reduction table to verify
+      against. A set of specific percentages the author brought back was
+      checked and rejected as not CISA-sourced (see LIMITATIONS.md item 7);
+      `reduces_risk_by` stays the author's own conservative estimate,
+      labeled as such in the config file. If a future read of the primary
+      PDF turns up a real per-goal figure, update the values and cite the
+      section directly.
+- [~] **TSA Security Directives — partially confirmed 2026-09-12.** One
+      primary document (SD Pipeline-2021-02C, 2022-07-27) was directly
+      reachable and used to confirm several claims (OT as "Critical Cyber
+      System," written confirmation of receipt, annual CAP submission,
+      2-yearly design review); a reliable secondary summary of the original
+      SD Pipeline-2021-01 confirmed the Cybersecurity Coordinator
+      requirement (must be a U.S. citizen eligible for a security
+      clearance — **this corrected a wrong claim** in material the author
+      first brought back, which said a NEXUS/Global Entry alternative
+      existed; it does not, in any source checked) and the 12-hour
+      incident-reporting window. **Still needed from you:** confirm the
+      current CAP audit percentage/cadence, any MSSP responsibility
+      language, and which amendment (-01G, -02F, or later) is currently in
+      force — these need the primary PDF, which still 403s for every
+      version past -02C. See `docs/BUILD_SPEC.md`'s "Policy text" section
+      for the full citation trail and what's still open.
 - [ ] Source vintages confirmed current as of the `--full` run date; newer
       releases of any of the five data sources noted if they exist.
 - [ ] Licenses and terms of every source re-read (ICS Advisory Project
