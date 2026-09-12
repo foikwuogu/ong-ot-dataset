@@ -220,6 +220,25 @@ honestly known about the data.
    with matched tokens every time — do not assume a lower number means the
    list has become trustworthy without eyes on it.
 
+   **Resolved, 2026-09-12 (real `--full` run against the require-2+-tokens
+   fix, on 27,944 rows):** the structural fix worked. Match rate is now
+   **100 of 27,944 rows (0.36%)** — genuinely rare, as this item originally
+   expected before the whack-a-mole episode started. Only two entities
+   fire at all: **INCONTROLLER** (82 rows; tokens `schneider+plcs`,
+   `schneider+codesys`, `plcs+codesys`) and **EKANS** (18 rows; tokens
+   `platforms+proficy`). Both check out as genuinely correct, not
+   coincidental: INCONTROLLER (aka PIPEDREAM) is documented malware built
+   specifically to target Schneider Electric and CODESYS-based PLCs, and
+   every matched row is exactly that (Schneider Electric EcoStruxure/
+   Modicon PLCs, ABB AC500 PLCs running CODESYS); EKANS (SNAKE) ransomware
+   is documented to specifically target GE's "Proficy" product line via
+   its process-kill list, and every matched row is a GE "Intelligent
+   Platforms Proficy" product (Cimplicity, Historian, Real-Time
+   Information Portal, HTML Help). No generic-word false positives
+   (FIN7/REvil/Conficker/APT38/etc.) survived into this run. `qa.py`'s own
+   >15%-match-rate flag did not trigger, confirming the pipeline's
+   self-check agrees. See `docs/NEXT_STEPS.md` item 7 for the fix details.
+
 7. **Two of the four primary policy documents could not be automatically
    retrieved as PDFs.** The CISA CPG 2.0 PDF and the TSA Security Directive
    Pipeline-2021-01G PDF both return HTTP 403 to automated fetch (likely

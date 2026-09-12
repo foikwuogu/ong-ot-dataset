@@ -55,10 +55,21 @@ order:
    has only one very strong, unambiguous token, e.g. just "Triconex" alone)
    was checked against the real ATT&CK bundle and did not affect any of
    the four confirmed true positives (PLC-Blaster, VPNFilter, Triton,
-   INCONTROLLER), all of which fire on 2+ tokens in practice. **Still
-   needed:** one more real `--full` run to get the actual post-fix match
-   rate and re-do the row-level spot-check sign-off in
-   `docs/VERIFY_CHECKLIST.md` against it — the 15.92% figure above is
-   pre-this-fix and will drop further. TF-IDF rarity scoring remains a
-   theoretical alternative if 2+-token matching still proves too noisy on
-   the next real run, but is not expected to be needed.
+   INCONTROLLER), all of which fire on 2+ tokens in practice.
+
+   **DONE, 2026-09-12 (real `--full` run, 27,944 rows, post-fix):** match
+   rate is 100/27,944 (0.36%) — down from 15.92% pre-fix, and genuinely
+   rare as originally expected. Only INCONTROLLER (82 rows) and EKANS (18
+   rows) fire; both spot-checked as correct (see LIMITATIONS.md item 6 for
+   the full writeup). PLC-Blaster, VPNFilter, and Triton — three of the
+   four previously-confirmed true positives — did not appear in this
+   run's matched set, meaning none of this run's 27,944 rows happened to
+   contain their distinctive token pairs (Stuxnet-related and
+   Dragonfly/OilRig-style generic-vocabulary false positives are also
+   absent, as expected). This is not a regression: the "confirmed true
+   positive" checks were done against specific known rows, not a claim
+   every run would reproduce all four — a row containing "Triconex" alone,
+   for instance, correctly stays unmatched under the 2+-token requirement.
+   Row-level spot-check sign-off in `docs/VERIFY_CHECKLIST.md` done
+   against this run. TF-IDF rarity scoring was not needed — the 2+-token
+   fix alone got the rate to genuinely rare without it.

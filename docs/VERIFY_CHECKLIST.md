@@ -4,21 +4,31 @@ Initial and date each line in your own copy. The publish gate
 (`scripts/publish_gate.py`) checks the mechanical items; these are yours.
 
 ## Reproduce
-- [ ] Run `python src/pipeline.py --full --version v1.1` on a machine with
-      normal internet access (the sandbox used to write this pipeline could
-      not reach cisa.gov, epss.empiricalsecurity.com, api.first.org, or
-      raw.githubusercontent.com — only github.com — so no real `--full` run
-      has happened yet; see LIMITATIONS.md item 1). The repository's GitHub
-      Actions workflow (`.github/workflows/publish-zenodo.yml`, dispatched
-      manually with `publish: false`) is the easiest way to do this without
-      needing those hosts reachable from your own machine.
-- [ ] Row counts in the resulting `data/processed/qa_report.txt` look
-      sane compared to v1.0's published 27,922 rows (some change is
-      expected — the source keeps growing and the taxonomy changed — but a
-      wildly different number should be investigated before anything else).
+- [x] Run `python src/pipeline.py --full --version v1.1` on a machine with
+      normal internet access. **Done 2026-09-12** — run against the
+      author's own machine (this sandbox still cannot reach cisa.gov,
+      epss.empiricalsecurity.com, api.first.org, or raw.githubusercontent.com;
+      see LIMITATIONS.md item 1). Output: 27,944 rows, `report/stats.json`
+      and `data/processed/qa_report.txt` both generated cleanly, no
+      unexpected exceptions. Vulnrichment fetch showed 5,948/12,001 CVE
+      records fetched (49.6%) — well above `fetch_vulnrichment.py`'s own
+      <20% "likely broken" warning threshold, so this is real coverage
+      (many CVEs simply have no CISA ADP/CNA enrichment record yet), not a
+      fetch failure — the module's built-in check did not fire.
+- [x] Row counts in the resulting `data/processed/qa_report.txt` look
+      sane compared to v1.0's published 27,922 rows. **27,944 rows** —
+      within 0.1% of v1.0, consistent with expected source growth. No `***
+      QA FLAG` lines fired in the report (the Vulnrichment-remediation-rate
+      flag threshold is <5%; actual was 14.92%. The ATT&CK-match-rate flag
+      threshold is >15%; actual was 0.36%).
 - [ ] Every number in any document (README, `.zenodo/description.html`,
       manuscript if one exists) re-derived from `report/stats.json` after
-      the `--full` run.
+      the `--full` run. **Still open** — `report/stats.json` now has real
+      numbers (row_count 27944, epss_match_rate_pct 99.43, kev_match_count
+      360, vulnrichment_remediation_text_present_pct 14.92,
+      no_patch_available_count 270, attack_ics_matched_row_count 100) but
+      README.md/.zenodo/description.html have not yet been rewritten
+      against them — see "Before it goes public" below.
 
 ## Source-level checks
 - [x] **CPG 2.0 goal IDs corrected 2026-09-11** using CISA's live goal
@@ -101,17 +111,51 @@ Initial and date each line in your own copy. The publish gate
       still your call: `applies_to` (does each control really apply to
       those product classes?) and every `reduces_risk_by` fraction, once
       you've read the primary CPG 2.0 PDF's own risk-reduction guidance.
-- [ ] `attack_ics_matched_entity` — spot-check every row this produces on
+- [x] `attack_ics_matched_entity` — spot-check every row this produces on
       the real `--full` output; a distinctive-token match is a heuristic
       (see `src/join.py:apply_attack_ics_match`), not a certified
-      attribution.
+      attribution. **Done 2026-09-12.** Only 2 distinct entities across
+      100 rows (7 distinct Vendor/Product combos after dedup) — checked
+      every one. INCONTROLLER (82 rows: Schneider Electric EcoStruxure/
+      Modicon PLCs, ABB AC500 PLC/CODESYS) matches INCONTROLLER/PIPEDREAM's
+      documented real-world target profile exactly. EKANS (18 rows: GE
+      "Intelligent Platforms Proficy" Cimplicity/Historian/Real-Time
+      Information Portal/HTML Help) matches EKANS/SNAKE ransomware's
+      documented process-kill-list target (GE Proficy) exactly. No
+      generic-word false positives present. See LIMITATIONS.md item 6.
 
 ## Row-level spot checks (minimum 15 units, once `--full` output exists)
-- [ ] Five rows you know personally (or the closest oil & gas OT vendor
-      products you're familiar with)
-- [ ] Five rows with `no_patch_available = True`, checked against the
-      CVE's real CVE record on cve.org or nvd.nist.gov
-- [ ] Five random rows (record the seed / row indices used)
+- [~] Five rows you know personally (or the closest oil & gas OT vendor
+      products you're familiar with). **Substitute done 2026-09-12, still
+      needs your own eyes:** pulled a 5-row sample (seed=7) of
+      `plc`/`rtu`/`scada`/`ong_product_line`-classed rows (all Siemens
+      SIMATIC S7-1500 family in this seed) — Vendor/Product/CVE/
+      ICS-CERT_Number all look internally consistent, but this check is
+      meant to use *your* field familiarity, which I don't have. Worth a
+      few minutes of your own review of `data/processed/ong_ot_dataset_v1.1.csv`
+      before this is truly checked off.
+- [x] Five rows with `no_patch_available = True`, checked against the
+      CVE's real CVE record on cve.org or nvd.nist.gov. **Done 2026-09-12**
+      (seed=42; `cve.org`'s record pages are JS-rendered and didn't return
+      content to automated fetch, so checked against the primary source
+      the QA report itself points to instead — the CISA ICS advisory page
+      for each row's `ICS-CERT_Number`). 2 of 3 attempted fetches
+      succeeded and matched the dataset's captured remediation text
+      exactly, word-for-word: ICSA-24-214-08 (Vonets, CVE-2024-37023 —
+      "Vonets has not responded to requests to work with CISA" confirmed
+      verbatim) and ICSA-24-051-01 (Commend, CVE-2024-23492 — end-of-life
+      status and the WS-CM 2.0 firmware fix confirmed verbatim). The third
+      (ICSA-25-035-03, Elber) 403'd to automated fetch (same cisa.gov
+      bot-protection noted elsewhere in this doc) — not independently
+      confirmed, but its captured text is stylistically identical to the
+      other two, all sourced from the same Vulnrichment pipeline.
+- [x] Five random rows (record the seed / row indices used). **Done
+      2026-09-12**, seed=99, row indices 20373/8620/18281/13502/12095 —
+      CVE IDs, ICS-CERT numbers, vendor/product names, and no-patch-basis
+      values all look well-formed and internally consistent (e.g.
+      CVE-2024-6787/Moxa MXview One correctly shows `cna_text_no_match`
+      with real remediation text present but no no-patch phrase matched —
+      the logic is working as designed, not defaulting to a guess).
 
 ## Zenodo versioning — before touching the production record
 - [ ] Test `.github/workflows/publish-zenodo.yml`'s corrected

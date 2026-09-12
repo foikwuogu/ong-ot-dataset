@@ -1,0 +1,54 @@
+QA report generated 2026-09-12
+Source rows: ics_advisories = 27944
+Source rows: kev = 1709
+Source rows: epss = 11951
+Source rows: vulnrichment = 5948
+Source rows: attack_ics_techniques = 118
+Source rows: attack_ics_groups_software = 37
+
+Total joined rows (one row = one CVE-advisory pair): 27944
+EPSS join: 27784 of 27944 rows matched a current EPSS score (99.43%)
+KEV join: 360 of 27944 rows are in the CISA KEV catalog (1.29%)
+Vulnrichment CNA solutions/workarounds text present: 4170 of 27944 rows (14.92%) — the rest are coded no_patch_basis='no_remediation_text_captured', not assumed patched (see LIMITATIONS.md)
+
+Product class distribution:
+  unmapped: 23246
+  plc: 4274
+  rtu: 170
+  scada: 158
+  ong_product_line: 96
+
+No-patch determination basis:
+  no_remediation_text_captured: 23774
+  cna_text_no_match: 3900
+  cna_text_match:has not responded: 126
+  cna_text_match:end-of-life: 74
+  cna_text_match:end of life: 16
+  cna_text_match:no fix: 14
+  cna_text_match:unsupported: 10
+  cna_text_match:no longer supported: 10
+  cna_text_match:no plans to: 10
+  cna_text_match:has not released: 4
+  cna_text_match:will not fix: 2
+  cna_text_match:will not be fixed: 2
+  cna_text_match:no patch: 2
+no_patch_available = True: 270 of 27944 rows
+
+CPG 2.0 compensating-control coverage:
+  rows with at least one applicable control: 4698 of 27944 (16.81%)
+
+ATT&CK for ICS group/software matches:
+  rows matched to a named group/software: 100 of 27944 (0.36%)
+  matched entities (top 10, with an example triggering token):
+    INCONTROLLER: 82 — matched token(s): plcs + codesys, schneider + codesys, schneider + plcs
+    EKANS: 18 — matched token(s): platforms + proficy
+
+Range check CVSS in [0,10]: 0 violations
+Range check EPSS in [0,1]: 0 violations
+
+Named spot checks (verify against the ICSA number's page on cisa.gov):
+  cve_id=CVE-2022-43398 | ICS-CERT_Number=ICSA-23-166-03 | Vendor=Siemens | Product=POWER METER SICAM Q200 family | ong_product_class=unmapped | no_patch_available=False | known_exploited=False
+  cve_id=CVE-2016-6393 | ICS-CERT_Number=ICSA-17-094-04 | Vendor=Rockwell Automation | Product=Stratix 5900 | ong_product_class=unmapped | no_patch_available=False | known_exploited=False
+  cve_id=CVE-2025-24479 | ICS-CERT_Number=ICSA-25-028-03 | Vendor=Rockwell Automation | Product=FactoryTalk | ong_product_class=unmapped | no_patch_available=False | known_exploited=False
+  cve_id=CVE-2015-3955 | ICS-CERT_Number=ICSA-15-161-01 | Vendor=Hospira | Product=Plum A+ and Symbiq Infusion Systems | ong_product_class=unmapped | no_patch_available=False | known_exploited=False
+  cve_id=CVE-2023-38380 | ICS-CERT_Number=ICSA-24-165-10 | Vendor=Siemens | Product=SIMATIC, SIPLUS | ong_product_class=plc | no_patch_available=False | known_exploited=False
