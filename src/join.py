@@ -270,9 +270,22 @@ def apply_attack_ics_match(product: str, entity_index: list[tuple[str, str, str,
     tokens = _distinctive_tokens(product)
     if not tokens or not entity_index:
         return "", "", "", ""
+    # Word-boundary match, not substring containment: `token in description`
+    # let short tokens match as fragments inside unrelated longer words in
+    # the entity's free-text STIX description (e.g. "opera" inside
+    # "operator/operation", "lion" inside "million/billion", "incl" inside
+    # "include/including", "over" inside "however/moreover/recover", "http"
+    # inside a literal URL) -- see the 2026-09-12 real --full run's QA
+    # report, where this is exactly what produced APT38's nonsense matched
+    # tokens (http/incl/lion/opera/over). Anchoring on word boundaries fixes
+    # that whole class of false positive without touching genuine whole-word
+    # hits (siemens, plcs, modbus, scada, schneider, tricon, triconex,
+    # codesys, omron), which is why this and _GENERIC_TOKENS are separate,
+    # complementary fixes -- re-validate with --demo (TRITON must still
+    # match on "triconex") before the next --full run.
     for description, name, entity_type, technique_ids in entity_index:
         for token in tokens:
-            if token in description:
+            if re.search(r"\b" + re.escape(token) + r"\b", description):
                 return name, entity_type, technique_ids, token
     return "", "", "", ""
 
