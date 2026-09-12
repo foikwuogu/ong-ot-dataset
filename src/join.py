@@ -26,6 +26,39 @@ CHANGED IN v1.1 (see BUILD_SPEC.md / CODEBOOK.md for the full rationale):
     Vendor or Product text — auditable, row-by-row, never a bulk/class-level
     inference. Most rows will not match; that is expected (see
     LIMITATIONS.md), not a bug.
+
+BUG FOUND 2026-09-12 during row-level verification of the first real
+`--full` output (27,944 rows): `apply_product_class`'s `vendor_or_product`
+match is plain substring containment (`candidate in product_text`), with no
+word-boundary check — the same class of bug already found and fixed for
+ATT&CK matching (see LIMITATIONS.md item 6), but not fixed here. It produced
+one confirmed, high-impact false positive: the `rtu` class candidate
+"ovation" (Emerson's Ovation DCS, a real oil & gas platform) matched inside
+the unrelated word "innovations" in "Real-Time Innovations (RTI)" — one
+single advisory about Data Distribution Service (DDS) middleware
+(ICSA-21-315-02), which has nothing to do with Emerson or RTUs, and which
+alone accounted for **52 of the `rtu` class's 170 rows (30.6%)**.
+
+A blanket word-boundary fix was considered and rejected: several other
+candidates in this same taxonomy only match today *because* they're
+missing a word boundary, and that's correct, not a bug — "SEL-4"/"SEL-3"/
+"SEL-7" are deliberately designed as prefixes to catch relay model numbers
+(SEL-411L, SEL-3530, SEL-700BT, etc.), and several real matches
+("androc800l", "andcompactlogix", "openpcs 7", "simatics") only exist
+because the source CSV text is missing a space or has a trailing typo, not
+because the match is wrong. Word-bounding every candidate would have fixed
+"ovation" but broken all of those. Fixed instead, narrowly, the same way
+the ATT&CK whack-a-mole problem was fixed: `_FALSE_POSITIVE_CONTAINERS`
+below blocks only the two specific collisions proven against real data —
+"ovation" inside "innovation(s)", and "multilin" (GE's protection-relay
+brand) inside "multilink" (a different, unrelated GE switch product) found
+during the same review, though that second one turned out to be inert in
+practice ("multilin"-only rows never reached `electric_adjacent` anyway,
+since that class also requires a context-keyword hit) — fixed anyway since
+it's the same bug shape and the fix is free. **[VERIFY]** if a future
+`--full` run's taxonomy changes add new short candidate strings, check them
+against real data the same way (see the row-level spot-check methodology
+in docs/VERIFY_CHECKLIST.md) before trusting a low "unmapped" count.
 """
 from __future__ import annotations
 import re
@@ -40,6 +73,31 @@ def load_yaml(path: str) -> dict:
 
 def _text_fields(row: pd.Series, fields: list[str]) -> str:
     return " ".join(str(row.get(f, "") or "") for f in fields).lower()
+
+
+# Specific, evidence-based false-positive collisions found during row-level
+# verification of real --full output (see the module docstring's "BUG FOUND
+# 2026-09-12" section). Each key is a taxonomy candidate string; its value is
+# the unrelated word(s) it was found matching inside. Deliberately narrow
+# (not a blanket word-boundary rule) so the many legitimate matches that
+# only work *because* they lack a boundary -- intentional prefixes like
+# "SEL-4", or real products separated from adjacent text by a missing space
+# in the source CSV -- are left untouched.
+_FALSE_POSITIVE_CONTAINERS: dict[str, tuple[str, ...]] = {
+    "ovation": ("innovation", "innovations"),
+    "multilin": ("multilink", "multilinks"),
+}
+
+
+def _candidate_in_text(candidate: str, text: str) -> bool:
+    """Substring containment, with known false-positive containers masked
+    out first so a real collision (e.g. "ovation" inside "innovations")
+    can't fire. See _FALSE_POSITIVE_CONTAINERS."""
+    containers = _FALSE_POSITIVE_CONTAINERS.get(candidate)
+    if containers:
+        for bad in containers:
+            text = text.replace(bad, " ")
+    return candidate in text
 
 
 def apply_product_class(row: pd.Series, taxonomy: dict) -> tuple[str, float]:
@@ -62,16 +120,16 @@ def apply_product_class(row: pd.Series, taxonomy: dict) -> tuple[str, float]:
         candidates = [c.lower() for c in spec.get("vendors_products", spec.get("vendors", [])) if c]
 
         if match_type == "vendor_only":
-            if any(c in vendor_text for c in candidates):
+            if any(_candidate_in_text(c, vendor_text) for c in candidates):
                 return class_name, spec.get("weight", 0.0)
 
         elif match_type == "vendor_or_product":
-            if any(c in product_text for c in candidates):
+            if any(_candidate_in_text(c, product_text) for c in candidates):
                 return class_name, spec.get("weight", 0.0)
 
         elif match_type == "vendor_or_product_and_context":
             context_keywords = [k.lower() for k in spec.get("context_keywords", []) if k]
-            if any(c in product_text for c in candidates) and any(k in product_text for k in context_keywords):
+            if any(_candidate_in_text(c, product_text) for c in candidates) and any(k in product_text for k in context_keywords):
                 return class_name, spec.get("weight", 0.0)
 
     return "unmapped", taxonomy.get("unmapped_default_weight", 0.0)

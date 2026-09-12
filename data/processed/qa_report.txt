@@ -12,10 +12,10 @@ KEV join: 360 of 27944 rows are in the CISA KEV catalog (1.29%)
 Vulnrichment CNA solutions/workarounds text present: 4170 of 27944 rows (14.92%) — the rest are coded no_patch_basis='no_remediation_text_captured', not assumed patched (see LIMITATIONS.md)
 
 Product class distribution:
-  unmapped: 23246
+  unmapped: 23298
   plc: 4274
-  rtu: 170
   scada: 158
+  rtu: 118
   ong_product_line: 96
 
 No-patch determination basis:
@@ -35,7 +35,7 @@ No-patch determination basis:
 no_patch_available = True: 270 of 27944 rows
 
 CPG 2.0 compensating-control coverage:
-  rows with at least one applicable control: 4698 of 27944 (16.81%)
+  rows with at least one applicable control: 4646 of 27944 (16.63%)
 
 ATT&CK for ICS group/software matches:
   rows matched to a named group/software: 100 of 27944 (0.36%)

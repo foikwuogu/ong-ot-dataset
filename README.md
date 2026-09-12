@@ -91,8 +91,10 @@ after any new `--full` run rather than editing these by hand.
 | `no_patch_available = True` | 270 (0.97%) |
 | ATT&CK for ICS matched (group/software) | 100 (0.36%) — INCONTROLLER (82 rows) and EKANS (18 rows) only; see `docs/LIMITATIONS.md` item 6 |
 
-Product class distribution: `unmapped` 23,246 · `plc` 4,274 · `rtu` 170 ·
-`scada` 158 · `ong_product_line` 96.
+Product class distribution: `unmapped` 23,298 · `plc` 4,274 · `rtu` 118 ·
+`scada` 158 · `ong_product_line` 96. (`rtu` was 170 before a taxonomy
+matching bug found the same day was fixed — see `docs/LIMITATIONS.md`
+item 11.)
 
 For comparison, v1.0 published 27,922 rows — v1.1's 27,944 is within 0.1%,
 consistent with normal source growth since v1.0's build date rather than a

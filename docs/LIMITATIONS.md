@@ -368,3 +368,58 @@ honestly known about the data.
     10.5281/zenodo.22503185. It now calls the Zenodo "new version" action
     first. **[VERIFY]** this against a Zenodo sandbox deposition before
     running it against the production record — see docs/VERIFY_CHECKLIST.md.
+
+11. **`apply_product_class` had the same bare-substring-match bug already
+    found in ATT&CK matching (item 6), and it was live in the `rtu`
+    class.** Found 2026-09-12 during the "five rows you know personally"
+    row-level spot-check (`docs/VERIFY_CHECKLIST.md`) — the very first
+    stratified sample pulled included three `rtu`-classed rows with vendors
+    (OSIsoft, a DDS-middleware consortium) that had no obvious connection
+    to Emerson's Ovation DCS, the platform that class's "ovation" candidate
+    is meant to catch. Checking why surfaced the bug: `product_text` is
+    matched against each candidate with plain `candidate in text`
+    containment, no word-boundary check, and "ovation" is a substring of
+    the ordinary word "innovations." One single advisory —
+    ICSA-21-315-02, "Multiple Data Distribution Service (DDS)
+    Implementations," whose Vendor field lists "Real-Time Innovations
+    (RTI)" among six unrelated DDS-middleware vendors — matched `rtu`
+    purely on that collision and alone accounted for **52 of the 170
+    `rtu`-class rows (30.6%)** in the first real `--full` run. A second,
+    lower-risk collision was found the same way: "multilin" (GE's
+    protection-relay brand, an `electric_adjacent` candidate) is a
+    substring of "multilink" (a different, unrelated GE switch product) —
+    this one turned out inert in the actual data (`electric_adjacent`
+    requires a context-keyword hit too, which those rows never had), but
+    was fixed anyway since the fix was free.
+
+    **Fixed same day, narrowly, not with a blanket word-boundary rule.** A
+    blanket fix was considered and rejected: several `plc`/`ong_product_line`
+    matches in this same dataset only work *because* they lack a word
+    boundary — "SEL-4"/"SEL-3"/"SEL-7" are deliberately-designed prefixes
+    for relay model numbers (SEL-411L, SEL-3530, SEL-700BT), and several
+    rows match only because the source CSV text is missing a space
+    ("andROC800L", "andCompactLogix") or has a stray trailing letter
+    ("SIMATICS" for SIMATIC) — word-bounding every candidate would have
+    fixed "ovation" but broken all of those. `src/join.py` now has a
+    `_FALSE_POSITIVE_CONTAINERS` table that masks out only the two proven
+    collision words ("innovation(s)", "multilink(s)") before testing
+    candidate membership — see that module's docstring for the full
+    writeup. Re-derived `ong_product_class`/`ong_product_weight` and the
+    downstream `cpg2_applicable_controls`/`cpg2_combined_risk_reduction`
+    columns for the existing real `--full` output in place (a pure
+    function of already-fetched columns — no new network fetch needed):
+    `rtu` 170 → **118**, `unmapped` 23,246 → 23,298, CPG 2.0 coverage
+    16.81% → 16.63%; every other stat (EPSS/KEV/Vulnrichment/no-patch/
+    ATT&CK) is unaffected, since none of those depend on product class.
+    `data/processed/qa_report.txt`, `report/stats.json`, and the checked-in
+    CSV all reflect the corrected numbers.
+
+    **[VERIFY]** if a future taxonomy update adds new short candidate
+    strings, check them against real data the same way before trusting a
+    plausible-looking class distribution — see the row-level spot-check
+    methodology this bug came from in `docs/VERIFY_CHECKLIST.md`. This is
+    also a process lesson worth keeping: the "five rows you know
+    personally" checklist item is not a formality — it caught something
+    the automated QA-flag thresholds structurally could not (a 30.6% purity
+    problem inside one already-small class doesn't move any dataset-wide
+    percentage enough to trip a flag).

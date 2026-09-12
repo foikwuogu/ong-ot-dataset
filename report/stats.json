@@ -1,16 +1,16 @@
 {
   "dataset_version": "v1.1",
-  "build_date_utc": "2026-09-12T17:22:56.233647+00:00",
+  "build_date_utc": "2026-09-12T17:48:55.049611+00:00",
   "row_count": 27944,
   "epss_match_rate_pct": 99.43,
   "kev_match_count": 360,
   "vulnrichment_remediation_text_present_pct": 14.92,
   "no_patch_available_count": 270,
   "ong_product_class_counts": {
-    "unmapped": 23246,
+    "unmapped": 23298,
     "plc": 4274,
-    "rtu": 170,
     "scada": 158,
+    "rtu": 118,
     "ong_product_line": 96
   },
   "attack_ics_matched_row_count": 100,

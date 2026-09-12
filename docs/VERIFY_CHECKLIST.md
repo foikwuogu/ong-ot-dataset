@@ -126,14 +126,20 @@ Initial and date each line in your own copy. The publish gate
 
 ## Row-level spot checks (minimum 15 units, once `--full` output exists)
 - [~] Five rows you know personally (or the closest oil & gas OT vendor
-      products you're familiar with). **Substitute done 2026-09-12, still
-      needs your own eyes:** pulled a 5-row sample (seed=7) of
-      `plc`/`rtu`/`scada`/`ong_product_line`-classed rows (all Siemens
-      SIMATIC S7-1500 family in this seed) — Vendor/Product/CVE/
-      ICS-CERT_Number all look internally consistent, but this check is
-      meant to use *your* field familiarity, which I don't have. Worth a
-      few minutes of your own review of `data/processed/ong_ot_dataset_v1.1.csv`
-      before this is truly checked off.
+      products you're familiar with). **Done differently than planned,
+      2026-09-12 — and it found a real bug.** A broader stratified sample
+      (3 vendors x 4 classes, seed=11) included rows that didn't look
+      right on inspection even without deep personal expertise: an OSIsoft
+      "PI System" row and a multi-vendor DDS-middleware row classed as
+      `plc`/`rtu`. Chasing that down found a genuine substring-match bug
+      (see `docs/LIMITATIONS.md` item 11) affecting 52 of the `rtu`
+      class's 170 rows — fixed the same day, dataset and stats
+      regenerated. This is real signal that the check worked, not a
+      substitute for it, but a second look with your own field
+      familiarity is still worth a few minutes against
+      `data/processed/ong_ot_dataset_v1.1.csv` (now corrected) before
+      calling this fully closed — I may not have caught everything a
+      domain expert would.
 - [x] Five rows with `no_patch_available = True`, checked against the
       CVE's real CVE record on cve.org or nvd.nist.gov. **Done 2026-09-12**
       (seed=42; `cve.org`'s record pages are JS-rendered and didn't return
