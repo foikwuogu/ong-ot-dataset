@@ -164,16 +164,27 @@ Initial and date each line in your own copy. The publish gate
       the logic is working as designed, not defaulting to a guess).
 
 ## Zenodo versioning — before touching the production record
-- [ ] Test `.github/workflows/publish-zenodo.yml`'s corrected
+- [x] Test `.github/workflows/publish-zenodo.yml`'s corrected
       new-version logic against the Zenodo **sandbox** (sandbox.zenodo.org)
-      first, not directly against record 22503185. **Runbook + standalone
-      test script written 2026-09-12** — `docs/PUBLISH_GUIDE.md` and
-      `scripts/test_zenodo_sandbox.sh` — but not run: it needs a sandbox
-      account and personal access token that only you should hold, so this
-      is a few minutes of your own time, not something done on your behalf.
-      The script makes the identical API calls in the identical order as
-      the workflow's own "Create or version Zenodo deposition" step, so a
-      clean run of it is real evidence about the workflow, not a facsimile.
+      first, not directly against record 22503185. **Done and passed,
+      2026-09-12.** `scripts/test_zenodo_sandbox.sh` (bash+jq) hit two
+      Windows-only snags: a missing `jq`, then a native Windows `jq.exe`
+      bug where its stdout gets silently text-mode-translated (`\n` ->
+      `\r\n`), corrupting the metadata JSON and producing a hard-to-read
+      500 on the metadata PUT step. Rewrote the identical API sequence as
+      `scripts/test_zenodo_sandbox.py` (stdlib only, no `jq` dependency) --
+      this is now the primary sandbox test script. Also found a real gap in
+      the original runbook: Zenodo's `newversion` action only works on an
+      already-**published** record (it needs a persistent identifier), so
+      the script's first run now also publishes its own fresh sandbox draft
+      automatically (safe -- sandbox-only, throwaway DOI, no connection to
+      production record 22503185). Full sequence run against sandbox record
+      602509 -> new draft 602510: correctly reported "carried over 4
+      file(s)", removed all 4, uploaded 4 fresh files, ended at **exactly
+      4** files attached (not 8) -- the file-carryover bug this test exists
+      to catch is confirmed fixed. Leftover sandbox drafts/records (602471,
+      602477, 602501, 602505, 602509, 602510) need deleting from the
+      sandbox UI -- harmless, sandbox-only, no real DOIs involved.
 
 ## Before it goes public
 - [ ] README, LIMITATIONS, and `.zenodo/description.html` rewritten in your

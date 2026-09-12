@@ -47,6 +47,26 @@ verify — the `newversion` action, and that files carried over from the
 ./scripts/test_zenodo_sandbox.sh 123456
 ```
 
+**Windows / Git Bash note (found 2026-09-12):** the bash+`jq` version above
+can hit two Windows-only snags -- `jq` not installed, and (if installed via
+`winget`) a native Windows `jq.exe` bug where its stdout gets silently
+text-mode-translated (`\n` -> `\r\n`), corrupting the metadata JSON and
+producing a hard-to-diagnose `500` on the metadata PUT step. If you hit
+that, use `scripts/test_zenodo_sandbox.py` instead -- same API calls, same
+order, stdlib-only Python, no `jq` dependency:
+
+```bash
+export ZENODO_ACCESS_TOKEN=paste-your-sandbox-token-here
+python scripts/test_zenodo_sandbox.py
+python scripts/test_zenodo_sandbox.py <the-id-it-printed>
+```
+
+Also note: Zenodo's `newversion` action only works on an already-**published**
+record -- it needs a persistent identifier to version. The first run above
+now publishes its own fresh sandbox draft automatically before handing you
+its id, which is safe: it's the sandbox, so this mints a throwaway sandbox
+DOI with zero connection to production record 22503185.
+
 ## 3. What a pass looks like
 
 Read the script's own output — it tells you what to check:
