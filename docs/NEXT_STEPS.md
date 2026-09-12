@@ -32,33 +32,33 @@ order:
    goal ID the automated-fetch workaround got wrong** (LIMITATIONS.md item
    7) — this should happen before v1.1 ships, not deferred to v1.2, but is
    listed here as the standing item until it's done.
-7. **Replace the ATT&CK for ICS single-token match with something that
-   doesn't structurally whack-a-mole.** Three real `--full` runs on
-   2026-09-11 each fixed the top offenders in `_GENERIC_TOKENS` and each
-   time the match rate stayed well above the "rare" LIMITATIONS.md item 6
-   originally expected (31.4% -> 26.7% -> not yet re-measured after round
-   3), because any single-word match against a long free-text description
-   will eventually collide with *some* ordinary English word from *some*
-   row's Product field, and the blocklist can only ever be as complete as
-   the data seen so far. Two structural options, neither implemented
-   because neither could be validated against the real ATT&CK for ICS
-   bundle from the build environment (no network access to
-   raw.githubusercontent.com) without risking silently breaking a
-   confirmed true positive like TRITON's single-token match on
-   "triconex":
-   - **Require 2+ independently-matching tokens** from the same Product
-     string against the same entity description, not just one. Likely
-     kills most remaining generic-word collisions (two unrelated common
-     words both landing in the same description by chance is much rarer
-     than one) while probably still passing multi-word true positives
-     (PLC-Blaster: siemens+plcs; Triton: schneider+tricon+triconex).
-     Risk: could suppress a genuine match built on one very strong,
-     unambiguous token (e.g. a row whose Product field is just
-     "Triconex" alone, no second token) — would need real data to check
-     before shipping.
-   - **Score by token rarity (TF-IDF against the ATT&CK for ICS corpus)**
-     instead of binary inclusion, so common words contribute near-zero
-     match weight automatically instead of needing to be hand-listed.
-     More principled, more implementation and testing effort.
-   Whichever the author picks, re-validate with `--demo` first (does
-   TRITON still match on "triconex"?) before running `--full` again.
+7. **~~Replace the ATT&CK for ICS single-token match with something that
+   doesn't structurally whack-a-mole.~~ DONE (commit after `0cff2bb`, real
+   run #5, 2026-09-12).** Three real `--full` runs on 2026-09-11 each fixed
+   the top offenders in `_GENERIC_TOKENS` and each time the match rate
+   stayed well above the "rare" LIMITATIONS.md item 6 originally expected
+   (31.4% -> 26.7%). A fourth real run on 2026-09-12 found and fixed a
+   separate bug — `token in description` was substring containment, not
+   word-boundary matching, which is what actually produced APT38's
+   nonsense tokens (http/incl/lion/opera/over); fixing that alone only
+   moved the rate 17.47% -> 15.92%, because it just promoted the next tier
+   of ordinary whole words (Industroyer2: impact/initial/over/protocol/
+   voltage; Bad Rabbit: secure) into the top 10 — confirming this really
+   was the structural problem this item describes, not just the substring
+   bug. Implemented the **require 2+ independently-matching tokens**
+   option below (not TF-IDF): `apply_attack_ics_match` now requires 2+
+   distinct Product-field tokens to each independently word-boundary-match
+   the same entity's description before tagging it, and returns all of
+   them (joined with " + ") in `attack_ics_matched_token` instead of just
+   one. Re-validated against `--demo`: TRITON still matches CVE-2025-30001
+   on "triconex + tricon" — the flagged risk (a row whose Product field
+   has only one very strong, unambiguous token, e.g. just "Triconex" alone)
+   was checked against the real ATT&CK bundle and did not affect any of
+   the four confirmed true positives (PLC-Blaster, VPNFilter, Triton,
+   INCONTROLLER), all of which fire on 2+ tokens in practice. **Still
+   needed:** one more real `--full` run to get the actual post-fix match
+   rate and re-do the row-level spot-check sign-off in
+   `docs/VERIFY_CHECKLIST.md` against it — the 15.92% figure above is
+   pre-this-fix and will drop further. TF-IDF rarity scoring remains a
+   theoretical alternative if 2+-token matching still proves too noisy on
+   the next real run, but is not expected to be needed.

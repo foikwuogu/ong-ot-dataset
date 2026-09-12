@@ -233,7 +233,8 @@ def _distinctive_tokens(text: str) -> list[str]:
 
 def apply_attack_ics_match(product: str, entity_index: list[tuple[str, str, str, str]]) -> tuple[str, str, str, str]:
     """Tag with any ATT&CK for ICS group/software whose own STIX description
-    contains a distinctive token from this row's Product text.
+    contains at least TWO distinct, independently-matching distinctive
+    tokens from this row's Product text.
 
     Deliberately matches on Product only, not Vendor, and only on tokens
     that survive _GENERIC_TOKENS filtering: an early version of this
@@ -248,6 +249,32 @@ def apply_attack_ics_match(product: str, entity_index: list[tuple[str, str, str,
     issues caught in --demo testing — see docs/VERIFY_CHECKLIST.md) is the
     middle ground.
 
+    Round 4 (2026-09-12, after the word-boundary fix below was validated
+    against a real --full run): fixing the substring bug dropped the match
+    rate only 17.47% -> 15.92% and simply promoted the next tier of
+    ordinary whole words into the top 10 -- Industroyer2 (impact, initial,
+    over, protocol, voltage) and Bad Rabbit (secure) joined FIN7
+    (services, utilities) and Dragonfly (service), none of which carry any
+    real ICS-threat-actor signal. This is the whack-a-mole NEXT_STEPS.md
+    item 7 predicted: single-token matching against a long free-text
+    description will always eventually collide with *some* ordinary word.
+    Requiring 2+ *distinct* tokens from the same Product string to each
+    independently appear in the same entity's description is the
+    structural fix chosen there over TF-IDF rarity scoring, on the theory
+    that two unrelated common words both landing in the same description
+    by chance is far rarer than one. Validated against --demo: TRITON
+    still matches (schneider + triconex, or schneider + tricon +
+    triconex depending on the row) because its true-positive rows always
+    carry multiple distinctive tokens; PLC-Blaster (plcs + siemens),
+    VPNFilter (modbus + scada), and INCONTROLLER (codesys + omron) survive
+    the same way. The known risk flagged in NEXT_STEPS.md -- a row whose
+    Product field carries only ONE very strong, unambiguous token (e.g.
+    just "Triconex" with nothing else distinctive) would now be missed
+    entirely -- was checked against the real bundle available in this
+    environment and not observed to affect any of the four confirmed
+    true positives above; re-check if a future source refresh changes
+    that.
+
     This stays intentionally conservative even so: ATT&CK for ICS techniques
     describe tradecraft against asset classes, not specific CVEs, so the
     only defensible per-row join is a literal name match against a group's
@@ -257,12 +284,14 @@ def apply_attack_ics_match(product: str, entity_index: list[tuple[str, str, str,
     pipeline defect (see LIMITATIONS.md).
 
     Returns (attack_matched_entity, attack_entity_type, attack_technique_ids,
-    attack_matched_token), or ("", "", "", "") when nothing matches. The
-    matched token is returned specifically so a run's QA report can show
-    *why* a match fired instead of just *that* it fired — see the
-    2026-09 finding in LIMITATIONS.md: real full-run output surfaced
-    non-ICS entities (FIN7, REvil, Conficker) in the top matches, which the
-    7-row demo fixture was too small to ever catch, and which cannot be
+    attack_matched_token), or ("", "", "", "") when nothing matches.
+    attack_matched_token is now every matching token for that entity,
+    joined with " + " (e.g. "schneider + triconex") rather than just the
+    first one, specifically so a run's QA report shows the *combination*
+    of evidence behind a match, not just one word of it — see the 2026-09
+    finding in LIMITATIONS.md: real full-run output surfaced non-ICS
+    entities (FIN7, REvil, Conficker, Bad Rabbit) in the top matches, which
+    the 7-row demo fixture is too small to ever catch, and which cannot be
     diagnosed from the entity name alone. Callers should memoize by
     product — see build_dataset — since the same value repeats across many
     rows.
@@ -281,12 +310,19 @@ def apply_attack_ics_match(product: str, entity_index: list[tuple[str, str, str,
     # that whole class of false positive without touching genuine whole-word
     # hits (siemens, plcs, modbus, scada, schneider, tricon, triconex,
     # codesys, omron), which is why this and _GENERIC_TOKENS are separate,
-    # complementary fixes -- re-validate with --demo (TRITON must still
-    # match on "triconex") before the next --full run.
+    # complementary fixes.
+    #
+    # On top of that: require 2+ distinct matching tokens per entity (see
+    # "Round 4" above) -- a single whole-word match is still too easy to
+    # come by via chance in a long STIX description.
+    unique_tokens = list(dict.fromkeys(tokens))  # dedupe, preserve order
     for description, name, entity_type, technique_ids in entity_index:
-        for token in tokens:
-            if re.search(r"\b" + re.escape(token) + r"\b", description):
-                return name, entity_type, technique_ids, token
+        matched = [
+            t for t in unique_tokens
+            if re.search(r"\b" + re.escape(t) + r"\b", description)
+        ]
+        if len(matched) >= 2:
+            return name, entity_type, technique_ids, " + ".join(matched)
     return "", "", "", ""
 
 
