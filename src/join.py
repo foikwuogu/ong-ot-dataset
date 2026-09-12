@@ -274,6 +274,19 @@ _STOPWORDS = {
 # schneider+plcs, plcs+codesys; EKANS: platforms+proficy) never hit any of
 # these pairs and are unaffected.
 #
+# Round 2 (2026-09-12, same day, after a real re-run confirmed the fix
+# above): CyberAv3ngers/FIN7/OilRig/Triton/BlackEnergy all vanished as
+# expected (142 -> 108 rows), but INCONTROLLER's count went UP 82 -> 90.
+# The +8 turned out to be the exact same 8 "IDEC PLCs (Programmable Logic
+# Controllers)" rows that were previously mis-tagged CyberAv3ngers via
+# "programmable + logic" -- once that pair was rejected for CyberAv3ngers,
+# the loop fell through to INCONTROLLER, whose description ALSO happens to
+# mention "PLCs" and "logic" generically, and matched on "plcs + logic"
+# instead. Same false positive, different label -- confirms this really is
+# structurally whack-a-mole (see NEXT_STEPS.md item 7) and each fix should
+# be expected to need a real re-run to check for exactly this kind of
+# reshuffling, not just a raw rate drop.
+#
 # A row is only rejected when its matched tokens for that entity are EXACTLY
 # one of these pairs and nothing else -- if a third, independent token also
 # matches, that's corroborating evidence beyond the generic phrase and the
@@ -282,6 +295,7 @@ _STOPWORDS = {
 # extend it the same reactive way _GENERIC_TOKENS was built.
 _NON_INDEPENDENT_PAIRS = {
     frozenset({"programmable", "logic"}),
+    frozenset({"plcs", "logic"}),
     frozenset({"denial", "service"}),
     frozenset({"denial", "services"}),
     frozenset({"built", "framework"}),
