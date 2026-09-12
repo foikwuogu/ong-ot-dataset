@@ -281,6 +281,55 @@ honestly known about the data.
    amendment tried. See `docs/BUILD_SPEC.md`'s "Policy text" section for
    the full citation trail.
 
+   **Update, 2026-09-12 (full direct read of the -02C primary PDF, plus web
+   research for the amendments after it):** the author supplied the full
+   SD Pipeline-2021-02C PDF and it was read end-to-end (all 21 pages plus
+   the annotated attachment), not just excerpted as before. Two things
+   this closes out: (1) no managed-security-service-provider language of
+   any kind appears anywhere in -02C's text, definitions section, or
+   attachment; and (2) -02C's own header states its **EXPIRATION DATE as
+   2023-07-27** — confirming directly, not just inferring, that -02C is
+   long superseded and cannot be cited as the current requirement.
+
+   Web research (search + fetches of secondary sources; `tsa.gov`'s own
+   SD PDFs still 403 to automated fetch, -02C included on a retest today)
+   filled in more of the amendment chain than was available on 2026-09-11:
+   - The 30%-annually / 100%-over-3-years CAP testing cadence is real and
+     dated: a law firm's direct quote of **SD Pipeline-2021-02D** (Vinson
+     & Elkins, "Resilience Reimagined," velaw.com) gives the operative
+     sentence as *"testing at least 30% of measures and capabilities
+     implemented under a CAP, with 100% to be tested over any three-year
+     period."* -02D was effective 2023-07-27 and expired 2024-07-27. No
+     source checked confirms word-for-word that this exact sentence
+     carried forward unchanged into -02E/-02F/-02G, though nothing found
+     suggests it was removed either — **[VERIFY]** against whichever
+     amendment is current when you have primary-PDF access.
+   - **Still no MSSP language found** in any source describing any
+     amendment (-02C read directly; -02D, -02E, -02F, -01G described only
+     in secondary sources) — three independent negative checks now,
+     across four amendments. Treat this as "not part of this directive
+     series in any version checked," not merely "unconfirmed," though a
+     primary-source read of the current amendment would make it certain.
+   - **Currently in force, best evidence available today:** SD
+     Pipeline-2021-**02F** (02-series, effective 2025-05-03) and SD
+     Pipeline-2021-**01G** (01-series, effective per one compliance-
+     tracking source 2026-01-16, per a filename-dated TSA memo
+     2026-01-09) — both per secondary/compliance-tracking sources, not a
+     primary PDF read. A file at a URL suggesting a further **02G**
+     amendment was also found via search, but no source could confirm its
+     date or that it (rather than -02F) is the one actually in force —
+     **[VERIFY]** this specifically against `tsa.gov/sd-and-ea` (TSA's own
+     current listing page, which was reachable and listed -02F as the
+     newest 02-series entry as of 2026-09-12, but did not reliably expose
+     amendment dates to automated parsing).
+   - New context: TSA proposed converting the SD series into a permanent
+     49 CFR rule (NPRM, November 2024); the public comment period closed
+     2025-02-05. As of the most recent secondary source found (a 2026
+     OMB/PRA renewal notice for the SD series' information-collection
+     requirements), the SD series was still the operative mechanism and no
+     final rule had yet issued — but this should be re-checked at release
+     time since it can change without much notice.
+
 8. **Single point-in-time pull, once `--full` is run.** EPSS scores, KEV
    membership, and Vulnrichment enrichment all change over time. Every value
    in a given release reflects that run's pull (recorded in

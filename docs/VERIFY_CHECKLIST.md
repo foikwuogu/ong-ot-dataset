@@ -37,22 +37,37 @@ Initial and date each line in your own copy. The publish gate
       labeled as such in the config file. If a future read of the primary
       PDF turns up a real per-goal figure, update the values and cite the
       section directly.
-- [~] **TSA Security Directives — partially confirmed 2026-09-12.** One
-      primary document (SD Pipeline-2021-02C, 2022-07-27) was directly
-      reachable and used to confirm several claims (OT as "Critical Cyber
-      System," written confirmation of receipt, annual CAP submission,
-      2-yearly design review); a reliable secondary summary of the original
+- [~] **TSA Security Directives — partially confirmed 2026-09-12, extended
+      same day.** The full SD Pipeline-2021-02C PDF (2022-07-27) was read
+      end-to-end (author-supplied) and used to confirm OT as "Critical
+      Cyber System," written confirmation of receipt, annual CAP
+      submission, 2-yearly design review, and — new — that -02C's own
+      header states it **expired 2023-07-27** and contains **no MSSP
+      language anywhere**. A reliable secondary summary of the original
       SD Pipeline-2021-01 confirmed the Cybersecurity Coordinator
       requirement (must be a U.S. citizen eligible for a security
       clearance — **this corrected a wrong claim** in material the author
       first brought back, which said a NEXUS/Global Entry alternative
       existed; it does not, in any source checked) and the 12-hour
-      incident-reporting window. **Still needed from you:** confirm the
-      current CAP audit percentage/cadence, any MSSP responsibility
-      language, and which amendment (-01G, -02F, or later) is currently in
-      force — these need the primary PDF, which still 403s for every
-      version past -02C. See `docs/BUILD_SPEC.md`'s "Policy text" section
-      for the full citation trail and what's still open.
+      incident-reporting window. Web research the same day found: the
+      30%-annually/100%-over-3-years CAP testing cadence is real, dated to
+      **-02D** specifically (secondary source, direct quote); the current
+      amendments are most likely **SD Pipeline-2021-02F** (02-series,
+      effective 2025-05-03) and **SD Pipeline-2021-01G** (01-series, early
+      January 2026) per secondary/compliance-tracking sources — not a
+      primary-PDF read, `tsa.gov` still 403s every SD PDF tried, -02C
+      included on retest; and no MSSP language turned up in any source
+      covering -02D/-02E/-02F/-01G either, three negative checks now.
+      **Still needed from you, and now narrower:** (1) confirm whether
+      -02F or a further -02G (a file was found but not independently
+      dated/confirmed as current) is actually in force — check
+      `tsa.gov/sd-and-ea` directly; (2) confirm the 30%/3-year CAP testing
+      language reads the same in the current amendment as it did in -02D;
+      (3) MSSP language can likely be dropped as "not part of this
+      directive series" rather than left as an open verification item,
+      once you've glanced at the current amendment's text yourself to be
+      sure. See `docs/BUILD_SPEC.md`'s "Policy text" section and
+      `docs/LIMITATIONS.md` item 7 for the full citation trail.
 - [ ] Source vintages confirmed current as of the `--full` run date; newer
       releases of any of the five data sources noted if they exist.
 - [ ] Licenses and terms of every source re-read (ICS Advisory Project

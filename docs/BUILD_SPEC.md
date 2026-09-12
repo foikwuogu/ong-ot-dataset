@@ -86,6 +86,28 @@ SOURCES:
      amendment (-01G, -02F, or a later one) is currently in effect, against
      the primary PDF yourself; see LIMITATIONS.md item 7.
 
+     **2026-09-12 follow-up (full -02C read + web research; see
+     LIMITATIONS.md item 7 for the complete citation trail):** the author's
+     full -02C PDF was read directly — its own header confirms EXPIRATION
+     DATE 2023-07-27, so -02C is conclusively not current, and no MSSP
+     language appears anywhere in its 21 pages or attachment. Web research
+     dates the 30%-annually/100%-over-3-years CAP testing language to
+     **-02D** specifically (direct quote via a law firm secondary source,
+     velaw.com), not confirmed verbatim in later amendments. Best available
+     evidence (secondary/compliance-tracking sources, not a primary-PDF
+     read — tsa.gov's SD PDFs still 403 automated fetch) points to
+     **SD Pipeline-2021-02F** (effective 2025-05-03) as the current
+     02-series amendment and **SD Pipeline-2021-01G** (effective early
+     January 2026) as the current 01-series one; a further **-02G** file
+     was found by search but not independently confirmed as current or
+     dated — still **[VERIFY]** against `tsa.gov/sd-and-ea` directly. No
+     MSSP language turned up in any secondary source covering -02D, -02E,
+     -02F, or -01G either — three independent negative checks across four
+     amendments now, not just the original one. Also worth noting for
+     future releases: TSA proposed converting this SD series into a
+     permanent 49 CFR rule (NPRM Nov 2024, comments closed 2025-02-05); no
+     final rule had issued as of the most recent source found.
+
 UNIT:           One row = one (CVE, CISA ICS Advisory) pair. Same grain as
                 v1.0. No hard oil-and-gas filter — the full ICS advisory
                 universe is kept, with ONG relevance expressed through
