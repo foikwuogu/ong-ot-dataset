@@ -1,11 +1,10 @@
 # ONG‑OT Vulnerability Prioritization Dataset
 
-**Status:** v1.1 -- verified and ready for publication (27,944 rows, real
-`--full` run 2026-09-12; see "Dataset at a glance" below and
-`docs/VERIFY_CHECKLIST.md` for the full verification record, including the
-author's own read of the TSA/CPG 2.0 policy PDFs and a passed Zenodo
-sandbox test of the versioning workflow). The published, citable release
-remains **v1.0.0** (DOI below) until v1.1 is actually published.
+**Status:** v1.1 -- published, 2026-09-12 (27,944 rows; see "Dataset at a
+glance" below and `docs/VERIFY_CHECKLIST.md` for the full verification
+record). Version DOI: [10.5281/zenodo.22729882](https://doi.org/10.5281/zenodo.22729882).
+The badge below is the concept DOI and always resolves to the latest
+version.
 
 **Author:** Friday Ogochukwu Ikwuogu ([ORCID 0009-0009-2222-1318](https://orcid.org/0009-0009-2222-1318)), Independent Researcher, Odessa, Texas, USA
 **Collaborators:** Silas Abutu (Petroleum Training Institute, Effurun, Delta State, Nigeria); Abidemi Orimogunje (Redeemer's University, Ede, Osun State, Nigeria) — full CRediT roles in `AUTHORS.json`
@@ -193,4 +192,4 @@ for the full text.
 
 ## Citation
 
-See `CITATION.cff`. DOI: [10.5281/zenodo.22503185](https://doi.org/10.5281/zenodo.22503185) (v1.0.0; a v1.1 version of the same record is pending — see status line above).
+See `CITATION.cff`. Concept DOI (always resolves to the latest version): [10.5281/zenodo.22503185](https://doi.org/10.5281/zenodo.22503185). To cite this specific version: [10.5281/zenodo.22729882](https://doi.org/10.5281/zenodo.22729882) (v1.1, published 2026-09-12).
